@@ -24,8 +24,6 @@ const (
 	rmsScaleDefault = 3.00
 )
 
-// Wrapped errors from audio, so that the caller can easily check errors
-// without importing both audio and waveform
 var (
 	// ErrFormat is returned when the input audio format is not a registered format
 	// with the audio package.
@@ -48,7 +46,7 @@ type Options struct {
 	ForegroundColor color.Color
 
 	// Resolution sets the number of times audio is read and drawn
-	// as a waveform per second of audio
+	// as a waveform, per second of audio.
 	Resolution int
 
 	// ScaleX and ScaleY are scaling factors used to scale a waveform image on its
