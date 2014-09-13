@@ -17,6 +17,7 @@ Usage of waveform:
   -fg-color="#000000": hex foreground color of output waveform image
   -in="": input audio file
   -out="": output PNG waveform image file
+  -resolution=1: number of times audio is read and drawn per second of audio
   -sharpness=1: sharpening factor used to add curvature to a scaled image
   -x=1: scaling factor for image X-axis
   -y=1: scaling factor for image Y-axis

@@ -36,6 +36,10 @@ var (
 	// strBGColor is the hex color value used to color the background of the waveform image
 	strBGColor = flag.String("bg-color", "#FFFFFF", "hex background color of output waveform image")
 
+	// resolution is the number of times audio is read and the waveform is drawn,
+	// per second of audio
+	resolution = flag.Int("resolution", 1, "number of times audio is read and drawn per second of audio")
+
 	// scaleX is the scaling factor for the output waveform file's X-axis
 	scaleX = flag.Int("x", 1, "scaling factor for image X-axis")
 
@@ -80,6 +84,8 @@ func main() {
 	img, err := waveform.New(audioFile, &waveform.Options{
 		BackgroundColor: bgColor,
 		ForegroundColor: fgColor,
+
+		Resolution: *resolution,
 
 		ScaleX: *scaleX,
 		ScaleY: *scaleY,

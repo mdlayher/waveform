@@ -47,6 +47,10 @@ type Options struct {
 	BackgroundColor color.Color
 	ForegroundColor color.Color
 
+	// Resolution sets the number of times audio is read and drawn
+	// as a waveform per second of audio
+	Resolution int
+
 	// ScaleX and ScaleY are scaling factors used to scale a waveform image on its
 	// X or Y axis, respectively.
 	ScaleX int
@@ -69,6 +73,9 @@ var DefaultOptions = &Options{
 	// Black waveform on white background
 	BackgroundColor: color.White,
 	ForegroundColor: color.Black,
+
+	// Read audio and draw waveform once per second of audio
+	Resolution: 1,
 
 	// No scaling
 	ScaleX: 1,
@@ -130,9 +137,9 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 
 	// samples is a slice of float64 audio samples, used to store decoded values
 	config := decoder.Config()
-	samples := make(audio.F64Samples, config.SampleRate*config.Channels)
+	samples := make(audio.F64Samples, config.SampleRate*config.Channels*options.Resolution)
 	for {
-		// Decode one second of audio
+		// Decode at specified resolution from options
 		if _, err := decoder.Read(samples); err != nil {
 			// On end of stream, stop reading values
 			if err == audio.EOS {
