@@ -97,9 +97,22 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		options = DefaultOptions
 	}
 
-	// If resolution is 0, set it to 1 to avoid divide-by-zero panic
-	if options.Resolution == 0 {
+	// If resolution is 0 or less, set it to 1 to avoid divide-by-zero panic
+	if options.Resolution <= 0 {
 		options.Resolution = 1
+	}
+
+	// If either scale is 0 or less, set to 1 to avoid empty image
+	if options.ScaleX <= 0 {
+		options.ScaleX = 1
+	}
+	if options.ScaleY <= 0 {
+		options.ScaleY = 1
+	}
+
+	// If sharpness is negative, set to 0
+	if options.Sharpness < 0 {
+		options.Sharpness = 0
 	}
 
 	// If color options are nil, set sane defaults to prevent panic
@@ -169,7 +182,7 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	imgX := len(rms) * options.ScaleX
 	imgY := yDefault * options.ScaleY
 
-	// Create output image, fill image with white background
+	// Create output image, fill image with specified background color
 	img := image.NewRGBA(image.Rect(0, 0, imgX, imgY))
 	draw.Draw(img, img.Bounds(), image.NewUniform(options.BackgroundColor), image.ZP, draw.Src)
 
