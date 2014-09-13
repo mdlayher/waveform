@@ -92,6 +92,14 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		options = DefaultOptions
 	}
 
+	// If color options are nil, set sane defaults to prevent panic
+	if options.BackgroundColor == nil {
+		options.BackgroundColor = DefaultOptions.BackgroundColor
+	}
+	if options.ForegroundColor == nil {
+		options.ForegroundColor = DefaultOptions.ForegroundColor
+	}
+
 	// Open audio decoder on input stream
 	decoder, _, err := audio.NewDecoder(r)
 	if err != nil {
