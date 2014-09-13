@@ -137,7 +137,7 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 
 	// samples is a slice of float64 audio samples, used to store decoded values
 	config := decoder.Config()
-	samples := make(audio.F64Samples, config.SampleRate*config.Channels*options.Resolution)
+	samples := make(audio.F64Samples, (config.SampleRate*config.Channels)/options.Resolution)
 	for {
 		// Decode at specified resolution from options
 		if _, err := decoder.Read(samples); err != nil {
