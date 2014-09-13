@@ -1,3 +1,4 @@
+// Package waveform is capable of generating waveform images from audio streams.  MIT Licensed.
 package waveform
 
 import (

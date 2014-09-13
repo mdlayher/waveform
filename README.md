@@ -1,7 +1,7 @@
-waveform
+waveform [![GoDoc](http://godoc.org/github.com/mdlayher/waveform?status.svg)](http://godoc.org/github.com/mdlayher/waveform)
 ========
 
-Go package capable of generating waveform images from audio files.  MIT Licensed.
+Go package capable of generating waveform images from audio streams.  MIT Licensed.
 
 An example binary called `waveform` is provided which show's the library's usage.
 Please see [cmd/waveform/README.md](https://github.com/mdlayher/waveform/blob/master/cmd/waveform/README.md)
