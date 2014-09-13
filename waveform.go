@@ -203,6 +203,12 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		if maxRMS > 0.40 {
 			rmsScale -= 0.25
 		}
+		if maxRMS > 0.45 {
+			rmsScale -= 0.25
+		}
+		if maxRMS > 0.50 {
+			rmsScale -= 0.25
+		}
 	}
 
 	// Begin iterating all gathered RMS values
