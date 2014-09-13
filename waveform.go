@@ -99,6 +99,11 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		options = DefaultOptions
 	}
 
+	// If resolution is 0, set it to 1 to avoid divide-by-zero panic
+	if options.Resolution == 0 {
+		options.Resolution = 1
+	}
+
 	// If color options are nil, set sane defaults to prevent panic
 	if options.BackgroundColor == nil {
 		options.BackgroundColor = DefaultOptions.BackgroundColor
