@@ -42,8 +42,8 @@ type Options struct {
 	Sharpness int
 
 	// ScaleRMS specifies if the waveform image should be scaled down on its Y-axis
-	// when certain RMS thresholds are reached.  This can be used to show a more accurate
-	// waveform when a song reaches very high RMS thresholds.
+	// when certain RMS thresholds are reached.  This can be used to show a more
+	// accurate waveform when a song reaches very high RMS thresholds.
 	ScaleRMS bool
 }
 
@@ -65,9 +65,9 @@ var DefaultOptions = &Options{
 	ScaleRMS: false,
 }
 
-// New creates a new image.Image from a io.Reader, with optional an optional Options struct
+// New creates a new image.Image from a io.Reader, with an optional Options struct
 // which may be set.  New reads the input io.Reader, processes its input into a waveform,
-// and returns the resulting image.  On failure, New will return any errors which occur.
+// and returns the resulting image.Image.  On failure, New will return any errors which occur.
 func New(r io.Reader, options *Options) (image.Image, error) {
 	// If options are nil, set sane defaults
 	if options == nil {
