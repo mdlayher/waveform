@@ -24,6 +24,22 @@ const (
 	rmsScaleDefault = 3.00
 )
 
+// Wrapped errors from audio, so that the caller can easily check errors
+// without importing both audio and waveform
+var (
+	// ErrFormat is returned when the input audio format is not a registered format
+	// with the audio package.
+	ErrFormat = struct{ error }{audio.ErrFormat}
+
+	// ErrInvalidData is returned when the input audio format is recognized, but
+	// the stream is invalid or corrupt in some way.
+	ErrInvalidData = struct{ error }{audio.ErrInvalidData}
+
+	// ErrUnexpectedEOS is returned when end-of-stream is encountered in the middle
+	// of a fixed-size block or data structure.
+	ErrUnexpectedEOS = struct{ error }{audio.ErrUnexpectedEOS}
+)
+
 // Options are used to customize properties about a waveform image.
 type Options struct {
 	// BackgroundColor and ForegroundColor specify the background and foreground
@@ -65,9 +81,11 @@ var DefaultOptions = &Options{
 	ScaleRMS: false,
 }
 
-// New creates a new image.Image from a io.Reader, with an optional Options struct
-// which may be set.  New reads the input io.Reader, processes its input into a waveform,
-// and returns the resulting image.Image.  On failure, New will return any errors which occur.
+// New creates a new image.Image from a io.Reader.  An Options struct may be passed to
+// enable further customization; else, DefaultOptions is used.
+//
+// New reads the input io.Reader, processes its input into a waveform, and returns the
+// resulting image.Image.  On failure, New will return any errors which occur.
 func New(r io.Reader, options *Options) (image.Image, error) {
 	// If options are nil, set sane defaults
 	if options == nil {
@@ -77,6 +95,22 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	// Open audio decoder on input stream
 	decoder, _, err := audio.NewDecoder(r)
 	if err != nil {
+		// Unknown format
+		if err == audio.ErrFormat {
+			return nil, ErrFormat
+		}
+
+		// Invalid data
+		if err == audio.ErrInvalidData {
+			return nil, ErrInvalidData
+		}
+
+		// Unexpected end-of-stream
+		if err == audio.ErrUnexpectedEOS {
+			return nil, ErrUnexpectedEOS
+		}
+
+		// All other errors
 		return nil, err
 	}
 

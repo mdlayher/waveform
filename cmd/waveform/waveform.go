@@ -88,6 +88,22 @@ func main() {
 
 		ScaleRMS: true,
 	})
+	if err != nil {
+		// Set of known errors
+		knownErr := map[error]struct{}{
+			waveform.ErrFormat:        struct{}{},
+			waveform.ErrInvalidData:   struct{}{},
+			waveform.ErrUnexpectedEOS: struct{}{},
+		}
+
+		// On known error, fatal log
+		if _, ok := knownErr[err]; ok {
+			log.Fatal(err)
+		}
+
+		// Unknown errors, panic
+		panic(err)
+	}
 
 	// Attempt to create output image file
 	imageFile, err := os.Create(*outFilename)
