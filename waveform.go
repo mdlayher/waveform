@@ -42,8 +42,12 @@ var (
 type Options struct {
 	// BackgroundColor and ForegroundColor specify the background and foreground
 	// color of a waveform image, respectively.
+	// AlternateColor specifies an optional secondary color which is alternated with
+	// the foreground color to create a stripe effect in the image.  If not specified,
+	// no alternate color will be used.
 	BackgroundColor color.Color
 	ForegroundColor color.Color
+	AlternateColor  color.Color
 
 	// Resolution sets the number of times audio is read and drawn
 	// as a waveform, per second of audio.
@@ -69,8 +73,10 @@ type Options struct {
 // passed to New.
 var DefaultOptions = &Options{
 	// Black waveform on white background
+	// No alternate color
 	BackgroundColor: color.White,
 	ForegroundColor: color.Black,
+	AlternateColor:  nil,
 
 	// Read audio and draw waveform once per second of audio
 	Resolution: 1,
@@ -121,6 +127,11 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	}
 	if options.ForegroundColor == nil {
 		options.ForegroundColor = DefaultOptions.ForegroundColor
+	}
+
+	// If alternate color is nil, use the same color as the foreground
+	if options.AlternateColor == nil {
+		options.AlternateColor = DefaultOptions.ForegroundColor
 	}
 
 	// Open audio decoder on input stream
@@ -213,7 +224,7 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 
 	// Begin iterating all gathered RMS values
 	x := 0
-	for _, r := range rms {
+	for count, r := range rms {
 		// Scale RMS value to an integer, using the height of the image and a constant
 		// scaling factor
 		scaleRMS := int(math.Floor(r * float64(img.Bounds().Max.Y) * rmsScale))
@@ -246,8 +257,15 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 					adjust = -1 * adjust
 				}
 
-				// Draw using specified color at specified X and Y coordinate
-				img.Set(x+i, y+adjust, options.ForegroundColor)
+				// On odd iterations, draw using specified foreground color at
+				// specified X and Y coordinate
+				if count%2 != 0 {
+					img.Set(x+i, y+adjust, options.ForegroundColor)
+				} else {
+					// On even iterations, draw using specified alternate color at
+					// specified X and Y coordinate
+					img.Set(x+i, y+adjust, options.AlternateColor)
+				}
 			}
 		}
 
