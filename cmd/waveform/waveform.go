@@ -30,11 +30,14 @@ var (
 	// inFilename is the file name of the output waveform PNG image file
 	outFilename = flag.String("out", "", "output PNG waveform image file")
 
+	// strBGColor is the hex color value used to color the background of the waveform image
+	strBGColor = flag.String("bg-color", "#FFFFFF", "hex background color of output waveform image")
+
 	// strFGColor is the hex color value used to color the foreground of the waveform image
 	strFGColor = flag.String("fg-color", "#000000", "hex foreground color of output waveform image")
 
-	// strBGColor is the hex color value used to color the background of the waveform image
-	strBGColor = flag.String("bg-color", "#FFFFFF", "hex background color of output waveform image")
+	// strAltColor is the hex color value used to set the alternate color of the waveform image
+	strAltColor = flag.String("alt-color", "", "hex alternate color of output waveform image")
 
 	// resolution is the number of times audio is read and the waveform is drawn,
 	// per second of audio
@@ -69,21 +72,30 @@ func main() {
 
 	log.Printf("audio: %s", audioFile.Name())
 
-	// Create image foreground color from input hex color string, or default
-	// to black if invalid
-	colorR, colorG, colorB := hexToRGB(*strFGColor)
-	fgColor := color.RGBA{colorR, colorG, colorB, 255}
-
 	// Create image background color from input hex color string, or default
 	// to black if invalid
-	colorR, colorG, colorB = hexToRGB(*strBGColor)
+	colorR, colorG, colorB := hexToRGB(*strBGColor)
 	bgColor := color.RGBA{colorR, colorG, colorB, 255}
+
+	// Create image foreground color from input hex color string, or default
+	// to black if invalid
+	colorR, colorG, colorB = hexToRGB(*strFGColor)
+	fgColor := color.RGBA{colorR, colorG, colorB, 255}
+
+	// Create image alternate color from input hex color string, or default
+	// to foreground color if empty
+	altColor := fgColor
+	if *strAltColor != "" {
+		colorR, colorG, colorB = hexToRGB(*strAltColor)
+		altColor = color.RGBA{colorR, colorG, colorB, 255}
+	}
 
 	// Generate a waveform image from the input file, using values passed from
 	// flags as options
 	img, err := waveform.New(audioFile, &waveform.Options{
 		BackgroundColor: bgColor,
 		ForegroundColor: fgColor,
+		AlternateColor:  altColor,
 
 		Resolution: *resolution,
 

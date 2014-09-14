@@ -13,6 +13,7 @@ for generating waveform images:
 ```
 $ waveform -h
 Usage of waveform:
+  -alt-color="": hex alternate color of output waveform image
   -bg-color="#FFFFFF": hex background color of output waveform image
   -fg-color="#000000": hex foreground color of output waveform image
   -in="": input audio file
