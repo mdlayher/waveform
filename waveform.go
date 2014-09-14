@@ -53,17 +53,17 @@ type Options struct {
 
 	// Resolution sets the number of times audio is read and drawn
 	// as a waveform, per second of audio.
-	Resolution int
+	Resolution uint
 
 	// ScaleX and ScaleY are scaling factors used to scale a waveform image on its
 	// X or Y axis, respectively.
-	ScaleX int
-	ScaleY int
+	ScaleX uint
+	ScaleY uint
 
 	// Sharpness is used to apply a curve to a waveform image, scaled on its X-axis.
 	// A higher value results in steeper curves, and a lower value results in more
 	// "blocky" curves.
-	Sharpness int
+	Sharpness uint
 
 	// ScaleClipping specifies if the waveform image should be scaled down on its
 	// Y-axis when clipping thresholds are reached.  This can be used to show a
@@ -113,22 +113,17 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		options = DefaultOptions
 	}
 
-	// If resolution is 0 or less, set it to 1 to avoid divide-by-zero panic
-	if options.Resolution <= 0 {
+	// If resolution is 0, set it to 1 to avoid divide-by-zero panic
+	if options.Resolution == 0 {
 		options.Resolution = 1
 	}
 
-	// If either scale is 0 or less, set to 1 to avoid empty image
-	if options.ScaleX <= 0 {
+	// If either scale is 0, set to 1 to avoid empty image
+	if options.ScaleX == 0 {
 		options.ScaleX = 1
 	}
-	if options.ScaleY <= 0 {
+	if options.ScaleY == 0 {
 		options.ScaleY = 1
-	}
-
-	// If sharpness is negative, set to 0
-	if options.Sharpness < 0 {
-		options.Sharpness = 0
 	}
 
 	// If color options are nil, set sane defaults to prevent panic
@@ -181,7 +176,7 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 
 	// samples is a slice of float64 audio samples, used to store decoded values
 	config := decoder.Config()
-	samples := make(audio.F64Samples, (config.SampleRate*config.Channels)/options.Resolution)
+	samples := make(audio.F64Samples, uint(config.SampleRate*config.Channels)/options.Resolution)
 	for {
 		// Decode at specified resolution from options
 		if _, err := decoder.Read(samples); err != nil {
@@ -207,8 +202,8 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	}
 
 	// Set image resolution
-	imgX := len(computed) * options.ScaleX
-	imgY := yDefault * options.ScaleY
+	imgX := len(computed) * int(options.ScaleX)
+	imgY := yDefault * int(options.ScaleY)
 
 	// Create output image, fill image with specified background color
 	img := image.NewRGBA(image.Rect(0, 0, imgX, imgY))
@@ -253,19 +248,19 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		// image above and below the center of the image
 		for y := imgHalfY - halfScaleComputed; y < scaleComputed+(imgHalfY-halfScaleComputed); y++ {
 			// If X-axis is being scaled, draw computed value over several X coordinates
-			for i := 0; i < options.ScaleX; i++ {
+			for i := 0; i < int(options.ScaleX); i++ {
 				// When scaled, adjust computed value to be lower on either side of the peak,
 				// so that the image appears more smooth and less "blocky"
 				var adjust int
 				if i < peak {
 					// Adjust downward
-					adjust = (i - peak) * options.Sharpness
+					adjust = (i - peak) * int(options.Sharpness)
 				} else if i == peak {
 					// No adjustment at peak
 					adjust = 0
 				} else {
 					// Adjust downward
-					adjust = (peak - i) * options.Sharpness
+					adjust = (peak - i) * int(options.Sharpness)
 				}
 
 				// On top half of the image, invert adjustment to create symmetry between
@@ -287,7 +282,7 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		}
 
 		// Increase X by scaling factor, to continue drawing at next loop
-		x += options.ScaleX
+		x += int(options.ScaleX)
 	}
 
 	// Return generated image

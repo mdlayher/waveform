@@ -41,17 +41,17 @@ var (
 
 	// resolution is the number of times audio is read and the waveform is drawn,
 	// per second of audio
-	resolution = flag.Int("resolution", 1, "number of times audio is read and drawn per second of audio")
+	resolution = flag.Uint("resolution", 1, "number of times audio is read and drawn per second of audio")
 
 	// scaleX is the scaling factor for the output waveform file's X-axis
-	scaleX = flag.Int("x", 1, "scaling factor for image X-axis")
+	scaleX = flag.Uint("x", 1, "scaling factor for image X-axis")
 
 	// scaleY is the scaling factor for the output waveform file's Y-axis
-	scaleY = flag.Int("y", 1, "scaling factor for image Y-axis")
+	scaleY = flag.Uint("y", 1, "scaling factor for image Y-axis")
 
 	// sharpness is the factor used to add curvature to a scaled image, preventing
 	// "blocky" images at higher scaling
-	sharpness = flag.Int("sharpness", 1, "sharpening factor used to add curvature to a scaled image")
+	sharpness = flag.Uint("sharpness", 1, "sharpening factor used to add curvature to a scaled image")
 )
 
 func main() {
