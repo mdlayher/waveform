@@ -276,7 +276,7 @@ func rmsF64Samples(samples audio.F64Samples) float64 {
 	}
 
 	// Multiply squared sum by (1/n) coefficient, return square root
-	return math.Sqrt(float64((float64(1) / float64(samples.Len()))) * sumSquare)
+	return math.Sqrt(sumSquare / float64(samples.Len()))
 }
 
 // validateOptions verifies that an input Options struct is correct, and
