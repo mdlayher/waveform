@@ -141,6 +141,9 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	// slice of audio samples
 	var computed []float64
 
+	// Track the current computed value
+	var value float64
+
 	// Track the maximum value computed, optionally used for scaling when
 	// audio approaches clipping
 	var maxValue float64
@@ -161,7 +164,7 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		}
 
 		// Apply SampleReduceFunc over float64 audio samples
-		value := options.Function(samples)
+		value = options.Function(samples)
 
 		// Track the highest value recorded
 		if value > maxValue {
@@ -172,9 +175,13 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		computed = append(computed, value)
 	}
 
+	// Store integer scale values
+	intScaleX := int(options.ScaleX)
+	intScaleY := int(options.ScaleY)
+
 	// Set image resolution
-	imgX := len(computed) * int(options.ScaleX)
-	imgY := yDefault * int(options.ScaleY)
+	imgX := len(computed) * intScaleX
+	imgY := yDefault * intScaleY
 
 	// Create output image, fill image with specified background color
 	img := image.NewRGBA(image.Rect(0, 0, imgX, imgY))
@@ -205,33 +212,37 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		}
 	}
 
+	// Values to be used for repeated computations
+	var scaleComputed, halfScaleComputed, adjust int
+	f64BoundY := float64(img.Bounds().Max.Y)
+	intSharpness := int(options.Sharpness)
+
 	// Begin iterating all computed values
 	x := 0
 	for count, c := range computed {
 		// Scale computed value to an integer, using the height of the image and a constant
 		// scaling factor
-		scaleComputed := int(math.Floor(c * float64(img.Bounds().Max.Y) * imgScale))
+		scaleComputed = int(math.Floor(c * f64BoundY * imgScale))
 
 		// Calculate the halfway point for the scaled computed value
-		halfScaleComputed := scaleComputed / 2
+		halfScaleComputed = scaleComputed / 2
 
 		// Iterate image coordinates on the Y-axis, generating a symmetrical waveform
 		// image above and below the center of the image
 		for y := imgHalfY - halfScaleComputed; y < scaleComputed+(imgHalfY-halfScaleComputed); y++ {
 			// If X-axis is being scaled, draw computed value over several X coordinates
-			for i := 0; i < int(options.ScaleX); i++ {
+			for i := 0; i < intScaleX; i++ {
 				// When scaled, adjust computed value to be lower on either side of the peak,
 				// so that the image appears more smooth and less "blocky"
-				var adjust int
 				if i < peak {
 					// Adjust downward
-					adjust = (i - peak) * int(options.Sharpness)
+					adjust = (i - peak) * intSharpness
 				} else if i == peak {
 					// No adjustment at peak
 					adjust = 0
 				} else {
 					// Adjust downward
-					adjust = (peak - i) * int(options.Sharpness)
+					adjust = (peak - i) * intSharpness
 				}
 
 				// On top half of the image, invert adjustment to create symmetry between
@@ -253,7 +264,7 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		}
 
 		// Increase X by scaling factor, to continue drawing at next loop
-		x += int(options.ScaleX)
+		x += intScaleX
 	}
 
 	// Return generated image
