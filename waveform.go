@@ -108,40 +108,11 @@ var DefaultOptions = &Options{
 // New reads the input io.Reader, processes its input into a waveform, and returns the
 // resulting image.Image.  On failure, New will return any errors which occur.
 func New(r io.Reader, options *Options) (image.Image, error) {
-	// If options are nil, set sane defaults
+	// Perform validation and corrections on options
 	if options == nil {
 		options = DefaultOptions
-	}
-
-	// If resolution is 0, set it to 1 to avoid divide-by-zero panic
-	if options.Resolution == 0 {
-		options.Resolution = 1
-	}
-
-	// If either scale is 0, set to 1 to avoid empty image
-	if options.ScaleX == 0 {
-		options.ScaleX = 1
-	}
-	if options.ScaleY == 0 {
-		options.ScaleY = 1
-	}
-
-	// If color options are nil, set sane defaults to prevent panic
-	if options.BackgroundColor == nil {
-		options.BackgroundColor = DefaultOptions.BackgroundColor
-	}
-	if options.ForegroundColor == nil {
-		options.ForegroundColor = DefaultOptions.ForegroundColor
-	}
-
-	// If alternate color is nil, use the same color as the foreground
-	if options.AlternateColor == nil {
-		options.AlternateColor = DefaultOptions.ForegroundColor
-	}
-
-	// If no SampleReduceFunc is specified, use rmsF64Samples
-	if options.Function == nil {
-		options.Function = rmsF64Samples
+	} else {
+		*options = validateOptions(*options)
 	}
 
 	// Open audio decoder on input stream
@@ -269,9 +240,9 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 					adjust = -1 * adjust
 				}
 
-				// On odd iterations, draw using specified foreground color at
-				// specified X and Y coordinate
-				if count%2 != 0 {
+				// On odd iterations (or if no alternate set), draw using specified
+				// foreground color at specified X and Y coordinate
+				if count%2 != 0 || options.AlternateColor == nil {
 					img.Set(x+i, y+adjust, options.ForegroundColor)
 				} else {
 					// On even iterations, draw using specified alternate color at
@@ -306,4 +277,39 @@ func rmsF64Samples(samples audio.F64Samples) float64 {
 
 	// Multiply squared sum by (1/n) coefficient, return square root
 	return math.Sqrt(float64((float64(1) / float64(samples.Len()))) * sumSquare)
+}
+
+// validateOptions verifies that an input Options struct is correct, and
+// sets sane defaults for fields which are not specified
+func validateOptions(options Options) Options {
+	// If resolution is 0, set it to default to avoid divide-by-zero panic
+	if options.Resolution == 0 {
+		options.Resolution = DefaultOptions.Resolution
+	}
+
+	// If either scale is 0, set to default to avoid empty image
+	if options.ScaleX == 0 {
+		options.ScaleX = DefaultOptions.ScaleX
+	}
+	if options.ScaleY == 0 {
+		options.ScaleY = DefaultOptions.ScaleY
+	}
+
+	// If color options are nil, set sane defaults to prevent panic
+	if options.BackgroundColor == nil {
+		options.BackgroundColor = DefaultOptions.BackgroundColor
+	}
+	if options.ForegroundColor == nil {
+		options.ForegroundColor = DefaultOptions.ForegroundColor
+	}
+	if options.AlternateColor == nil {
+		options.AlternateColor = DefaultOptions.AlternateColor
+	}
+
+	// If no SampleReduceFunc is specified, use default
+	if options.Function == nil {
+		options.Function = DefaultOptions.Function
+	}
+
+	return options
 }

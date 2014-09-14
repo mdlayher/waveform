@@ -9,6 +9,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"reflect"
 	"testing"
 
 	"azul3d.org/audio.v1"
@@ -178,6 +179,42 @@ func Test_rmsF64Samples(t *testing.T) {
 			}
 
 			t.Fatalf("[%02d] unexpected result: %v != %v", i, rms, test.result)
+		}
+	}
+}
+
+// Test_validateOptions verifies that validateOptions correctly sets
+// sane default options
+func Test_validateOptions(t *testing.T) {
+	// Copy default options, but set sharpness to zero because it
+	// is not adjusted from the user's setting
+	defaultOptions := *DefaultOptions
+	defaultOptions.Sharpness = 0
+
+	var tests = []struct {
+		input  Options
+		output Options
+	}{
+		// Empty options set, defaults used
+		{Options{}, defaultOptions},
+		// Empty uint values, defaults used
+		{Options{Resolution: 0, ScaleX: 0, ScaleY: 0}, defaultOptions},
+		// Empty color values, defaults used
+		{Options{ForegroundColor: nil, BackgroundColor: nil, AlternateColor: nil}, defaultOptions},
+		// Sharpness set, defaults used
+		{Options{Sharpness: 1}, *DefaultOptions},
+	}
+
+	for i, test := range tests {
+		// Validate and compare output
+		output := validateOptions(test.input)
+
+		// Since functions are only equal if both nil, we cannot check their equality
+		output.Function = nil
+		test.output.Function = nil
+
+		if !reflect.DeepEqual(output, test.output) {
+			t.Fatalf("[%02d] unexpected result: %#v != %#v", i, output, test.output)
 		}
 	}
 }
