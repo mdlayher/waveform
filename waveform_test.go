@@ -131,7 +131,7 @@ func TestNew(t *testing.T) {
 
 		// Check for expected bounds
 		bounds := img.Bounds()
-		var scaleX, scaleY int
+		var scaleX, scaleY uint
 		if test.options == nil {
 			scaleX = defaultX
 			scaleY = defaultY
@@ -141,7 +141,7 @@ func TestNew(t *testing.T) {
 			scaleY = test.options.ScaleY * defaultY
 		}
 
-		if bounds.Max.X != scaleX || bounds.Max.Y != scaleY {
+		if uint(bounds.Max.X) != scaleX || uint(bounds.Max.Y) != scaleY {
 			t.Fatalf("unexpected bounds: (%v,%v) != (%v,%v)", bounds.Max.X, bounds.Max.Y, scaleX, scaleY)
 		}
 	}
