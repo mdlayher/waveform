@@ -104,7 +104,7 @@ func main() {
 
 		Sharpness: *sharpness,
 
-		ScaleRMS: true,
+		ScaleClipping: true,
 	})
 	if err != nil {
 		// Set of known errors

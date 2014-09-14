@@ -19,9 +19,9 @@ const (
 	// yDefault is the default height of the generated waveform image
 	yDefault = 128
 
-	// rmsScaleDefault is the default scaling factor used when scaling RMS value and waveform height
-	// by the output image's height
-	rmsScaleDefault = 3.00
+	// scaleDefault is the default scaling factor used when scaling computed
+	// value and waveform height by the output image's height
+	scaleDefault = 3.00
 )
 
 var (
@@ -63,10 +63,15 @@ type Options struct {
 	// "blocky" curves.
 	Sharpness int
 
-	// ScaleRMS specifies if the waveform image should be scaled down on its Y-axis
-	// when certain RMS thresholds are reached.  This can be used to show a more
-	// accurate waveform when a song reaches very high RMS thresholds.
-	ScaleRMS bool
+	// ScaleClipping specifies if the waveform image should be scaled down on its Y-axis
+	// when clipping thresholds are reached.  This can be used to show a more
+	// accurate waveform when a waveform exhibits signs of audio clipping.
+	ScaleClipping bool
+
+	// Function is used to specify an alternate SampleReduceFunc for use in waveform
+	// generation.  The function is applied over a slice of float64 audio samples,
+	// reducing them to a single value.
+	Function SampleReduceFunc
 }
 
 // DefaultOptions is a set of sane defaults, which are applied when no options are
@@ -88,8 +93,11 @@ var DefaultOptions = &Options{
 	// Normal sharpness
 	Sharpness: 1,
 
-	// Do not scale high RMS values
-	ScaleRMS: false,
+	// Do not scale clipping values
+	ScaleClipping: false,
+
+	// Use rmsF64Samples as a SampleReduceFunc
+	Function: rmsF64Samples,
 }
 
 // New creates a new image.Image from a io.Reader.  An Options struct may be passed to
@@ -134,6 +142,11 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		options.AlternateColor = DefaultOptions.ForegroundColor
 	}
 
+	// If no SampleReduceFunc is specified, use rmsF64Samples
+	if options.Function == nil {
+		options.Function = rmsF64Samples
+	}
+
 	// Open audio decoder on input stream
 	decoder, _, err := audio.NewDecoder(r)
 	if err != nil {
@@ -156,11 +169,13 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		return nil, err
 	}
 
-	// rms is a slice of computed RMS values from each second of audio samples
-	rms := make([]float64, 0)
+	// computed is a slice of computed values by a SampleReduceFunc, from each
+	// slice of audio samples
+	var computed []float64
 
-	// Track the maximum RMS value computed, optionally used for scaling later
-	var maxRMS float64
+	// Track the maximum value computed, optionally used for scaling when
+	// audio approaches clipping
+	var maxValue float64
 
 	// samples is a slice of float64 audio samples, used to store decoded values
 	config := decoder.Config()
@@ -177,20 +192,20 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 			return nil, err
 		}
 
-		// Calculate RMS from float64 audio samples
-		rmsSample := rmsF64Samples(samples)
+		// Apply SampleReduceFunc over float64 audio samples
+		value := options.Function(samples)
 
-		// Track the highest RMS value
-		if rmsSample > maxRMS {
-			maxRMS = rmsSample
+		// Track the highest value recorded
+		if value > maxValue {
+			maxValue = value
 		}
 
 		// Store computed value
-		rms = append(rms, rmsSample)
+		computed = append(computed, value)
 	}
 
 	// Set image resolution
-	imgX := len(rms) * options.ScaleX
+	imgX := len(computed) * options.ScaleX
 	imgY := yDefault * options.ScaleY
 
 	// Create output image, fill image with specified background color
@@ -203,41 +218,41 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	// Calculate a peak value used for smoothing scaled X-axis images
 	peak := int(math.Ceil(float64(options.ScaleX)) / 2)
 
-	// Calculate RMS scaling factor, based upon maximum RMS value found
-	// If option ScaleRMS is true, when maximum value is above certain thresholds
-	// the scaling factor is reduced to show an accurate waveform with less clipping
-	rmsScale := rmsScaleDefault
-	if options.ScaleRMS {
-		if maxRMS > 0.35 {
-			rmsScale -= 0.5
+	// Calculate scaling factor, based upon maximum value computed by a SampleReduceFunc.
+	// If option ScaleClipping is true, when maximum value is above certain thresholds
+	// the scaling factor is reduced to show an accurate waveform with less clipping.
+	imgScale := scaleDefault
+	if options.ScaleClipping {
+		if maxValue > 0.35 {
+			imgScale -= 0.5
 		}
-		if maxRMS > 0.40 {
-			rmsScale -= 0.25
+		if maxValue > 0.40 {
+			imgScale -= 0.25
 		}
-		if maxRMS > 0.45 {
-			rmsScale -= 0.25
+		if maxValue > 0.45 {
+			imgScale -= 0.25
 		}
-		if maxRMS > 0.50 {
-			rmsScale -= 0.25
+		if maxValue > 0.50 {
+			imgScale -= 0.25
 		}
 	}
 
-	// Begin iterating all gathered RMS values
+	// Begin iterating all computed values
 	x := 0
-	for count, r := range rms {
-		// Scale RMS value to an integer, using the height of the image and a constant
+	for count, c := range computed {
+		// Scale computed value to an integer, using the height of the image and a constant
 		// scaling factor
-		scaleRMS := int(math.Floor(r * float64(img.Bounds().Max.Y) * rmsScale))
+		scaleComputed := int(math.Floor(c * float64(img.Bounds().Max.Y) * imgScale))
 
-		// Calculate the halfway point for the scaled RMS value
-		halfScaleRMS := scaleRMS / 2
+		// Calculate the halfway point for the scaled computed value
+		halfScaleComputed := scaleComputed / 2
 
 		// Iterate image coordinates on the Y-axis, generating a symmetrical waveform
 		// image above and below the center of the image
-		for y := imgHalfY - halfScaleRMS; y < scaleRMS+(imgHalfY-halfScaleRMS); y++ {
-			// If X-axis is being scaled, draw RMS value over several X coordinates
+		for y := imgHalfY - halfScaleComputed; y < scaleComputed+(imgHalfY-halfScaleComputed); y++ {
+			// If X-axis is being scaled, draw computed value over several X coordinates
 			for i := 0; i < options.ScaleX; i++ {
-				// When scaled, adjust RMS value to be lower on either side of the peak,
+				// When scaled, adjust computed value to be lower on either side of the peak,
 				// so that the image appears more smooth and less "blocky"
 				var adjust int
 				if i < peak {
@@ -277,8 +292,13 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	return img, nil
 }
 
-// rmsF64Samples calculates the root mean square of a slice of float64 audio samples,
-// enabling the measurement of magnitude over the entire set of samples.
+// SampleReduceFunc is a function which reduces a set of float64 audio samples
+// into a single float64 value.
+type SampleReduceFunc func(samples audio.F64Samples) float64
+
+// rmsF64Samples is a SampleReduceFunc which calculates the root mean square
+// of a slice of float64 audio samples, enabling the measurement of magnitude
+// over the entire set of samples.
 // Derived from: http://en.wikipedia.org/wiki/Root_mean_square
 func rmsF64Samples(samples audio.F64Samples) float64 {
 	// Square and sum all input samples
