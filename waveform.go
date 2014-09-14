@@ -24,6 +24,8 @@ const (
 	scaleDefault = 3.00
 )
 
+// Error values from azul3d/audio.v1 are wrapped, so that callers do not have to
+// import an additional package to check for common errors.
 var (
 	// ErrFormat is returned when the input audio format is not a registered format
 	// with the audio package.
@@ -63,9 +65,9 @@ type Options struct {
 	// "blocky" curves.
 	Sharpness int
 
-	// ScaleClipping specifies if the waveform image should be scaled down on its Y-axis
-	// when clipping thresholds are reached.  This can be used to show a more
-	// accurate waveform when a waveform exhibits signs of audio clipping.
+	// ScaleClipping specifies if the waveform image should be scaled down on its
+	// Y-axis when clipping thresholds are reached.  This can be used to show a
+	// more accurate waveform, when a waveform exhibits signs of audio clipping.
 	ScaleClipping bool
 
 	// Function is used to specify an alternate SampleReduceFunc for use in waveform
