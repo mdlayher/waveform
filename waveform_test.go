@@ -148,8 +148,8 @@ func TestNew(t *testing.T) {
 	}
 }
 
-// Test_rmsF64Samples verifies that rmsF64Samples computes correct results
-func Test_rmsF64Samples(t *testing.T) {
+// TestRMSF64Samples verifies that RMSF64Samples computes correct results
+func TestRMSF64Samples(t *testing.T) {
 	var tests = []struct {
 		samples audio.F64Samples
 		result  float64
@@ -172,7 +172,7 @@ func Test_rmsF64Samples(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if rms := rmsF64Samples(test.samples); rms != test.result {
+		if rms := RMSF64Samples(test.samples); rms != test.result {
 			// If expected result is NaN, continue
 			if math.IsNaN(rms) && test.isNaN {
 				continue

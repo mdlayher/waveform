@@ -98,8 +98,8 @@ var DefaultOptions = &Options{
 	// Do not scale clipping values
 	ScaleClipping: false,
 
-	// Use rmsF64Samples as a SampleReduceFunc
-	Function: rmsF64Samples,
+	// Use RMSF64Samples as a SampleReduceFunc
+	Function: RMSF64Samples,
 }
 
 // New creates a new image.Image from a io.Reader.  An Options struct may be passed to
@@ -264,11 +264,12 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 // into a single float64 value.
 type SampleReduceFunc func(samples audio.F64Samples) float64
 
-// rmsF64Samples is a SampleReduceFunc which calculates the root mean square
+// RMSF64Samples is a SampleReduceFunc which calculates the root mean square
 // of a slice of float64 audio samples, enabling the measurement of magnitude
 // over the entire set of samples.
+//
 // Derived from: http://en.wikipedia.org/wiki/Root_mean_square
-func rmsF64Samples(samples audio.F64Samples) float64 {
+func RMSF64Samples(samples audio.F64Samples) float64 {
 	// Square and sum all input samples
 	var sumSquare float64
 	for i := range samples {
