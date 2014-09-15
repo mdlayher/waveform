@@ -153,13 +153,9 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	samples := make(audio.F64Samples, uint(config.SampleRate*config.Channels)/options.Resolution)
 	for {
 		// Decode at specified resolution from options
-		if _, err := decoder.Read(samples); err != nil {
-			// On end of stream, stop reading values
-			if err == audio.EOS {
-				break
-			}
-
-			// On all other errors, return
+		// On any error other than end-of-stream, return
+		_, err := decoder.Read(samples)
+		if err != nil && err != audio.EOS {
 			return nil, err
 		}
 
@@ -173,6 +169,11 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 
 		// Store computed value
 		computed = append(computed, value)
+
+		// On end of stream, stop reading values
+		if err == audio.EOS {
+			break
+		}
 	}
 
 	// Store integer scale values

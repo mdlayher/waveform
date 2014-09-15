@@ -79,13 +79,13 @@ func ExampleNew() {
 
 	// Output:
 	// open: ./test/tone16bit.flac
-	// encoded: 86 bytes
+	// encoded: 88 bytes
 }
 
 // TestNew verifies that New creates the proper parser for an example input stream
 func TestNew(t *testing.T) {
 	// X is set by file duration, Y by library
-	const defaultX = 4
+	const defaultX = 5
 	const defaultY = 128
 
 	// Table of tests
