@@ -86,7 +86,7 @@ func ExampleNew() {
 func TestNew(t *testing.T) {
 	// X is set by file duration, Y by library
 	const defaultX = 5
-	const defaultY = 128
+	const defaultY = imgYDefault
 
 	// Table of tests
 	var tests = []struct {

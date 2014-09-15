@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	// yDefault is the default height of the generated waveform image
-	yDefault = 128
+	// imgYDefault is the default height of the generated waveform image
+	imgYDefault = 128
 
 	// scaleDefault is the default scaling factor used when scaling computed
 	// value and waveform height by the output image's height
@@ -182,7 +182,7 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 
 	// Set image resolution
 	imgX := len(computed) * intScaleX
-	imgY := yDefault * intScaleY
+	imgY := imgYDefault * intScaleY
 
 	// Create output image, fill image with specified background color
 	img := image.NewRGBA(image.Rect(0, 0, imgX, imgY))
