@@ -199,16 +199,9 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	// the scaling factor is reduced to show an accurate waveform with less clipping.
 	imgScale := scaleDefault
 	if options.ScaleClipping {
-		if maxValue > 0.35 {
-			imgScale -= 0.5
-		}
-		if maxValue > 0.40 {
-			imgScale -= 0.25
-		}
-		if maxValue > 0.45 {
-			imgScale -= 0.25
-		}
-		if maxValue > 0.50 {
+		// For each 0.05 maximum increment at 0.30 and above, reduce the scaling
+		// factor by 0.25.  This is a rough estimate and may be tweaked in the future.
+		for i := 0.30; i < maxValue; i += 0.05 {
 			imgScale -= 0.25
 		}
 	}
