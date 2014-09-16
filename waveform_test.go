@@ -103,11 +103,11 @@ func TestNew(t *testing.T) {
 		// WAV file, no options
 		{wavFile, nil, nil},
 		// WAV file, scaled
-		{wavFile, nil, &Options{ScaleX: 5, ScaleY: 2}},
+		{wavFile, nil, &Options{ComputeOptions{}, ImageOptions{ScaleX: 5, ScaleY: 2}}},
 		// FLAC file, no options
 		{flacFile, nil, nil},
 		// FLAC file, scaled
-		{flacFile, nil, &Options{ScaleX: 5, ScaleY: 2}},
+		{flacFile, nil, &Options{ComputeOptions{}, ImageOptions{ScaleX: 5, ScaleY: 2}}},
 	}
 
 	// Iterate all tests
@@ -188,7 +188,7 @@ func TestRMSF64Samples(t *testing.T) {
 func Test_validateOptions(t *testing.T) {
 	// Copy default options, but set sharpness to zero because it
 	// is not adjusted from the user's setting
-	defaultOptions := *DefaultOptions
+	defaultOptions := DefaultOptions
 	defaultOptions.Sharpness = 0
 
 	var tests = []struct {
@@ -198,11 +198,11 @@ func Test_validateOptions(t *testing.T) {
 		// Empty options set, defaults used
 		{Options{}, defaultOptions},
 		// Empty uint values, defaults used
-		{Options{Resolution: 0, ScaleX: 0, ScaleY: 0}, defaultOptions},
+		{Options{ComputeOptions{Resolution: 0}, ImageOptions{ScaleX: 0, ScaleY: 0}}, defaultOptions},
 		// Empty color values, defaults used
-		{Options{ForegroundColor: nil, BackgroundColor: nil, AlternateColor: nil}, defaultOptions},
+		{Options{ComputeOptions{}, ImageOptions{ForegroundColor: nil, BackgroundColor: nil, AlternateColor: nil}}, defaultOptions},
 		// Sharpness set, defaults used
-		{Options{Sharpness: 1}, *DefaultOptions},
+		{Options{ComputeOptions{}, ImageOptions{Sharpness: 1}}, DefaultOptions},
 	}
 
 	for i, test := range tests {
