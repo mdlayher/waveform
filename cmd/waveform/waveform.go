@@ -93,18 +93,22 @@ func main() {
 	// Generate a waveform image from the input file, using values passed from
 	// flags as options
 	img, err := waveform.New(audioFile, &waveform.Options{
-		BackgroundColor: bgColor,
-		ForegroundColor: fgColor,
-		AlternateColor:  altColor,
+		waveform.ComputeOptions{
+			Resolution: *resolution,
+		},
 
-		Resolution: *resolution,
+		waveform.ImageOptions{
+			BackgroundColor: bgColor,
+			ForegroundColor: fgColor,
+			AlternateColor:  altColor,
 
-		ScaleX: *scaleX,
-		ScaleY: *scaleY,
+			ScaleX: *scaleX,
+			ScaleY: *scaleY,
 
-		Sharpness: *sharpness,
+			Sharpness: *sharpness,
 
-		ScaleClipping: true,
+			ScaleClipping: true,
+		},
 	})
 	if err != nil {
 		// Set of known errors

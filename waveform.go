@@ -40,8 +40,27 @@ var (
 	ErrUnexpectedEOS = struct{ error }{audio.ErrUnexpectedEOS}
 )
 
-// Options are used to customize properties about a waveform image.
+// Options are used to customize properties about a waveform image.  It embeds both
+// the ComputeOptions and ImageOptions types.  It is used to customize the New operation.
 type Options struct {
+	ComputeOptions
+	ImageOptions
+}
+
+// ComputeOptions are used to customize the ComputeValues operation.
+type ComputeOptions struct {
+	// Resolution sets the number of times audio is read and drawn
+	// as a waveform, per second of audio.
+	Resolution uint
+
+	// Function is used to specify an alternate SampleReduceFunc for use in waveform
+	// generation.  The function is applied over a slice of float64 audio samples,
+	// reducing them to a single value.
+	Function SampleReduceFunc
+}
+
+// ImageOptions are used to customize the ImageFromValues operation.
+type ImageOptions struct {
 	// BackgroundColor and ForegroundColor specify the background and foreground
 	// color of a waveform image, respectively.
 	// AlternateColor specifies an optional secondary color which is alternated with
@@ -50,10 +69,6 @@ type Options struct {
 	BackgroundColor color.Color
 	ForegroundColor color.Color
 	AlternateColor  color.Color
-
-	// Resolution sets the number of times audio is read and drawn
-	// as a waveform, per second of audio.
-	Resolution uint
 
 	// ScaleX and ScaleY are scaling factors used to scale a waveform image on its
 	// X or Y axis, respectively.
@@ -69,52 +84,133 @@ type Options struct {
 	// Y-axis when clipping thresholds are reached.  This can be used to show a
 	// more accurate waveform, when a waveform exhibits signs of audio clipping.
 	ScaleClipping bool
-
-	// Function is used to specify an alternate SampleReduceFunc for use in waveform
-	// generation.  The function is applied over a slice of float64 audio samples,
-	// reducing them to a single value.
-	Function SampleReduceFunc
 }
 
-// DefaultOptions is a set of sane defaults, which are applied when no options are
-// passed to New.
-var DefaultOptions = &Options{
-	// Black waveform on white background
-	// No alternate color
-	BackgroundColor: color.White,
-	ForegroundColor: color.Black,
-	AlternateColor:  nil,
+// DefaultOptions is a set of sane defaults, which are applied when nil Options are
+// passed to any function which accepts Options, ComputeOptions, or ImageOptions.
+var DefaultOptions = Options{
+	// Options specific to ComputeValues
+	ComputeOptions{
+		// Read audio and compute values once per second of audio
+		Resolution: 1,
 
-	// Read audio and draw waveform once per second of audio
-	Resolution: 1,
+		// Use RMSF64Samples as a SampleReduceFunc
+		Function: RMSF64Samples,
+	},
 
-	// No scaling
-	ScaleX: 1,
-	ScaleY: 1,
+	// Options specific to ImageFromValues
+	ImageOptions{
+		// Black waveform on white background
+		// No alternate color
+		BackgroundColor: color.White,
+		ForegroundColor: color.Black,
+		AlternateColor:  nil,
 
-	// Normal sharpness
-	Sharpness: 1,
+		// No scaling
+		ScaleX: 1,
+		ScaleY: 1,
 
-	// Do not scale clipping values
-	ScaleClipping: false,
+		// Normal sharpness
+		Sharpness: 1,
 
-	// Use RMSF64Samples as a SampleReduceFunc
-	Function: RMSF64Samples,
+		// Do not scale clipping values
+		ScaleClipping: false,
+	},
 }
 
-// New creates a new image.Image from a io.Reader.  An Options struct may be passed to
-// enable further customization; else, DefaultOptions is used.
+// New creates a new image.Image from a io.Reader.  An Options struct may be passed
+// to enable further customization; else, DefaultOptions is used.
 //
-// New reads the input io.Reader, processes its input into a waveform, and returns the
-// resulting image.Image.  On failure, New will return any errors which occur.
+// New is typically used for one-time-only waveform generation.  If the
+// same audio stream will be processed multiple times during a single program run, it
+// is better to use a combination of ComputeValues and ImageFromValues, instead of New.
+//
+// New is equivalent to calling ComputeValues, and passing the return value to ImageFromValues.
 func New(r io.Reader, options *Options) (image.Image, error) {
 	// Perform validation and corrections on options
+	var opt Options
 	if options == nil {
-		options = DefaultOptions
+		opt = DefaultOptions
 	} else {
-		*options = validateOptions(*options)
+		opt = validateOptions(*options)
 	}
 
+	// Compute values from input stream
+	computed, err := readAndComputeSamples(r, opt)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate and return output image
+	return generateImage(computed, opt), nil
+}
+
+// ComputeValues creates a slice of float64 values, computed using an input function.  A ComputeOptions
+// struct may be passed to enable further customization; else, DefaultOptions.ComputeOptions is used.
+//
+// ComputeValues is typically used once on an audio stream, to read and calculate the values
+// used for subsequent waveform generations.  Its return value can be used with ImageFromValues to
+// generate and customize multiple waveform images from a single stream.
+func ComputeValues(r io.Reader, options *ComputeOptions) ([]float64, error) {
+	// Perform validation and corrections on options
+	var opt Options
+	if options == nil {
+		opt = DefaultOptions
+	} else {
+		opt = validateOptions(Options{
+			ComputeOptions: *options,
+		})
+	}
+
+	return readAndComputeSamples(r, opt)
+}
+
+// ImageFromValues creates a new image.Image from a slice of float64 values.  An ImageOptions struct
+// may be passed to enable further customization; else, DefaultOptions.ImageOptions is used.
+//
+// ImageFromValues is typically used after a waveform has been computed one time, and a slice of
+// computed values was returned from the first computation.  Subsequent waveform generations from
+// the same audio stream can be generated and customized much more quickly using this function,
+// rather than calling New again.
+func ImageFromValues(values []float64, options *ImageOptions) image.Image {
+	// Perform validation and corrections on options
+	var opt Options
+	if options == nil {
+		opt = DefaultOptions
+	} else {
+		opt = validateOptions(Options{
+			ImageOptions: *options,
+		})
+	}
+
+	// Generate and return output image
+	return generateImage(values, opt)
+}
+
+// SampleReduceFunc is a function which reduces a set of float64 audio samples
+// into a single float64 value.
+type SampleReduceFunc func(samples audio.F64Samples) float64
+
+// RMSF64Samples is a SampleReduceFunc which calculates the root mean square
+// of a slice of float64 audio samples, enabling the measurement of magnitude
+// over the entire set of samples.
+//
+// Derived from: http://en.wikipedia.org/wiki/Root_mean_square.
+func RMSF64Samples(samples audio.F64Samples) float64 {
+	// Square and sum all input samples
+	var sumSquare float64
+	for i := range samples {
+		sumSquare += math.Pow(float64(samples.At(i)), 2)
+	}
+
+	// Multiply squared sum by (1/n) coefficient, return square root
+	return math.Sqrt(sumSquare / float64(samples.Len()))
+}
+
+// readAndComputeSamples opens an input audio stream, computes samples according
+// to an input function from options, and returns a slice of computed values and
+// any errors which occurred.
+func readAndComputeSamples(r io.Reader, options Options) ([]float64, error) {
 	// Open audio decoder on input stream
 	decoder, _, err := audio.NewDecoder(r)
 	if err != nil {
@@ -144,10 +240,6 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	// Track the current computed value
 	var value float64
 
-	// Track the maximum value computed, optionally used for scaling when
-	// audio approaches clipping
-	var maxValue float64
-
 	// samples is a slice of float64 audio samples, used to store decoded values
 	config := decoder.Config()
 	samples := make(audio.F64Samples, uint(config.SampleRate*config.Channels)/options.Resolution)
@@ -162,11 +254,6 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		// Apply SampleReduceFunc over float64 audio samples
 		value = options.Function(samples)
 
-		// Track the highest value recorded
-		if value > maxValue {
-			maxValue = value
-		}
-
 		// Store computed value
 		computed = append(computed, value)
 
@@ -176,6 +263,13 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 		}
 	}
 
+	// Return slice of computed values
+	return computed, nil
+}
+
+// generateImage takes a slice of computed values and options, and generates
+// a waveform image from the input.  Options are applied as set by the caller.
+func generateImage(computed []float64, options Options) image.Image {
 	// Store integer scale values
 	intScaleX := int(options.ScaleX)
 	intScaleY := int(options.ScaleY)
@@ -199,6 +293,14 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	// the scaling factor is reduced to show an accurate waveform with less clipping.
 	imgScale := scaleDefault
 	if options.ScaleClipping {
+		// Find maximum value from input slice
+		var maxValue float64
+		for _, c := range computed {
+			if c > maxValue {
+				maxValue = c
+			}
+		}
+
 		// For each 0.05 maximum increment at 0.30 and above, reduce the scaling
 		// factor by 0.25.  This is a rough estimate and may be tweaked in the future.
 		for i := 0.30; i < maxValue; i += 0.05 {
@@ -262,27 +364,7 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	}
 
 	// Return generated image
-	return img, nil
-}
-
-// SampleReduceFunc is a function which reduces a set of float64 audio samples
-// into a single float64 value.
-type SampleReduceFunc func(samples audio.F64Samples) float64
-
-// RMSF64Samples is a SampleReduceFunc which calculates the root mean square
-// of a slice of float64 audio samples, enabling the measurement of magnitude
-// over the entire set of samples.
-//
-// Derived from: http://en.wikipedia.org/wiki/Root_mean_square
-func RMSF64Samples(samples audio.F64Samples) float64 {
-	// Square and sum all input samples
-	var sumSquare float64
-	for i := range samples {
-		sumSquare += math.Pow(float64(samples.At(i)), 2)
-	}
-
-	// Multiply squared sum by (1/n) coefficient, return square root
-	return math.Sqrt(sumSquare / float64(samples.Len()))
+	return img
 }
 
 // validateOptions verifies that an input Options struct is correct, and
