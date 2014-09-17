@@ -48,7 +48,8 @@ var (
 	}()
 )
 
-// TestNew verifies that New creates the proper parser for an example input stream
+// TestNew verifies that New reads an input audio stream properly, and generates a
+// correct output image.
 func TestNew(t *testing.T) {
 	// X is set by file duration, Y by library
 	const defaultX = 5
@@ -110,6 +111,100 @@ func TestNew(t *testing.T) {
 
 		if uint(bounds.Max.X) != scaleX || uint(bounds.Max.Y) != scaleY {
 			t.Fatalf("unexpected bounds: (%v,%v) != (%v,%v)", bounds.Max.X, bounds.Max.Y, scaleX, scaleY)
+		}
+	}
+}
+
+// Test_readAndComputeSamples verifies that readAndComputeSamples provides the correct output values
+// for an input audio stream with the specified options
+func Test_readAndComputeSamples(t *testing.T) {
+	// Options for this test
+	res0Opt := ComputeOptions{
+		Resolution: 0,
+		Function:   RMSF64Samples,
+	}
+	res2Opt := ComputeOptions{
+		Resolution: 2,
+		Function:   RMSF64Samples,
+	}
+
+	nilFnOpt := ComputeOptions{
+		Resolution: 1,
+		Function:   nil,
+	}
+	zeroFnOpt := ComputeOptions{
+		Resolution: 1,
+		Function: func(samples audio.F64Samples) float64 {
+			return 0.00
+		},
+	}
+
+	// Special values used for this test
+	fiveZeroF64 := []float64{0.00, 0.00, 0.00, 0.00, 0.00}
+
+	// Table of tests
+	var tests = []struct {
+		stream  []byte
+		err     error
+		options ComputeOptions
+		values  []float64
+	}{
+		// MP3 file
+		{mp3File, ErrFormat, DefaultOptions.ComputeOptions, nil},
+		// Ogg Vorbis file
+		{oggVorbisFile, ErrFormat, DefaultOptions.ComputeOptions, nil},
+		// Unknown format
+		{[]byte("nonsense"), ErrFormat, DefaultOptions.ComputeOptions, nil},
+		// WAV file, standard options
+		{wavFile, nil, DefaultOptions.ComputeOptions, []float64{0.7071166200538482, 0.7071166444294603, 0.7071166239921965, 0.7071165471800284, 0.7071166847631818}},
+		// WAV file, zero resolution
+		{wavFile, errZeroResolution, res0Opt, nil},
+		// WAV file, double resolution
+		{wavFile, nil, res2Opt, []float64{0.707116568673387, 0.7071166714342908, 0.7071166912513497, 0.7071165976075522, 0.7071165950470297, 0.7071166529373748, 0.7071165684016294, 0.7071165259584128, 0.7071167206200514, 0.7071166487801294}},
+		// WAV file, nil function
+		{wavFile, errNilFunction, nilFnOpt, nil},
+		// WAV file, zero function
+		{wavFile, nil, zeroFnOpt, fiveZeroF64},
+		// FLAC file, standard options
+		{flacFile, nil, DefaultOptions.ComputeOptions, []float64{0.7071166200538482, 0.7071166444294603, 0.7071166239921965, 0.7071165471800284, 0.7071166825227931}},
+		// FLAC file, zero resolution
+		{flacFile, errZeroResolution, res0Opt, nil},
+		// FLAC file, double resolution
+		{flacFile, nil, res2Opt, []float64{0.707116568673387, 0.7071166714342908, 0.7071166912513497, 0.7071165976075522, 0.7071165950470297, 0.7071166529373748, 0.7071165684016294, 0.7071165259584128, 0.7071167206200514, 0.7071166444255262}},
+		// FLAC file, nil function
+		{flacFile, errNilFunction, nilFnOpt, nil},
+		// FLAC file, zero function
+		{flacFile, nil, zeroFnOpt, fiveZeroF64},
+	}
+
+	// Iterate all tests
+	for i, test := range tests {
+		// Generate a io.Reader
+		reader := bytes.NewReader(test.stream)
+
+		// Attempt to read and compute value of samples
+		values, err := readAndComputeSamples(reader, test.options)
+		if err != nil {
+			if err == test.err {
+				continue
+			}
+
+			t.Fatalf("[%d] unexpected error: %v", i, err)
+		}
+
+		// Optionally compare values
+		if test.values != nil {
+			// Verify same length
+			if len(values) != len(test.values) {
+				t.Fatalf("[%d] unexpected length: %v != %v", len(values), len(test.values))
+			}
+
+			// Iterate and check values
+			for j := 0; j < len(values); j++ {
+				if values[j] != test.values[j] {
+					t.Fatalf("[%d:%d] unexpected values: %v != %v", i, j, values[j], test.values[j])
+				}
+			}
 		}
 	}
 }

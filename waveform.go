@@ -2,6 +2,7 @@
 package waveform
 
 import (
+	"errors"
 	"image"
 	"image/color"
 	"image/draw"
@@ -38,6 +39,14 @@ var (
 	// ErrUnexpectedEOS is returned when end-of-stream is encountered in the middle
 	// of a fixed-size block or data structure.
 	ErrUnexpectedEOS = struct{ error }{audio.ErrUnexpectedEOS}
+)
+
+var (
+	// errNilFunction is returned when an input SampleReduceFunc is nil.
+	errNilFunction = errors.New("waveform: nil SampleRedunceFunc")
+
+	// errZeroResolution is returned when input Resolution is 0.
+	errZeroResolution = errors.New("waveform: zero Resolution")
 )
 
 // Options are used to customize properties about a waveform image.  It embeds both
@@ -136,13 +145,13 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 	}
 
 	// Compute values from input stream
-	computed, err := readAndComputeSamples(r, opt)
+	computed, err := readAndComputeSamples(r, opt.ComputeOptions)
 	if err != nil {
 		return nil, err
 	}
 
 	// Generate and return output image
-	return generateImage(computed, opt), nil
+	return generateImage(computed, opt.ImageOptions), nil
 }
 
 // ComputeValues creates a slice of float64 values, computed using an input function.  A ComputeOptions
@@ -162,7 +171,7 @@ func ComputeValues(r io.Reader, options *ComputeOptions) ([]float64, error) {
 		})
 	}
 
-	return readAndComputeSamples(r, opt)
+	return readAndComputeSamples(r, opt.ComputeOptions)
 }
 
 // ImageFromValues creates a new image.Image from a slice of float64 values.  An ImageOptions struct
@@ -184,7 +193,7 @@ func ImageFromValues(values []float64, options *ImageOptions) image.Image {
 	}
 
 	// Generate and return output image
-	return generateImage(values, opt)
+	return generateImage(values, opt.ImageOptions)
 }
 
 // SampleReduceFunc is a function which reduces a set of float64 audio samples
@@ -210,7 +219,15 @@ func RMSF64Samples(samples audio.F64Samples) float64 {
 // readAndComputeSamples opens an input audio stream, computes samples according
 // to an input function from options, and returns a slice of computed values and
 // any errors which occurred.
-func readAndComputeSamples(r io.Reader, options Options) ([]float64, error) {
+func readAndComputeSamples(r io.Reader, options ComputeOptions) ([]float64, error) {
+	// Validate input
+	if options.Function == nil {
+		return nil, errNilFunction
+	}
+	if options.Resolution == 0 {
+		return nil, errZeroResolution
+	}
+
 	// Open audio decoder on input stream
 	decoder, _, err := audio.NewDecoder(r)
 	if err != nil {
@@ -269,7 +286,7 @@ func readAndComputeSamples(r io.Reader, options Options) ([]float64, error) {
 
 // generateImage takes a slice of computed values and options, and generates
 // a waveform image from the input.  Options are applied as set by the caller.
-func generateImage(computed []float64, options Options) image.Image {
+func generateImage(computed []float64, options ImageOptions) image.Image {
 	// Store integer scale values
 	intScaleX := int(options.ScaleX)
 	intScaleY := int(options.ScaleY)
