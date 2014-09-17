@@ -68,7 +68,7 @@ type ComputeOptions struct {
 	Function SampleReduceFunc
 }
 
-// ImageOptions are used to customize the ImageFromValues operation.
+// ImageOptions are used to customize the DrawImage operation.
 type ImageOptions struct {
 	// BackgroundColor and ForegroundColor specify the background and foreground
 	// color of a waveform image, respectively.
@@ -107,7 +107,7 @@ var DefaultOptions = Options{
 		Function: RMSF64Samples,
 	},
 
-	// Options specific to ImageFromValues
+	// Options specific to DrawImage
 	ImageOptions{
 		// Black waveform on white background
 		// No alternate color
@@ -132,9 +132,9 @@ var DefaultOptions = Options{
 //
 // New is typically used for one-time-only waveform generation.  If the
 // same audio stream will be processed multiple times during a single program run, it
-// is better to use a combination of ComputeValues and ImageFromValues, instead of New.
+// is better to use a combination of ComputeValues and DrawImage, instead of New.
 //
-// New is equivalent to calling ComputeValues, and passing the return value to ImageFromValues.
+// New is equivalent to calling ComputeValues, and passing the return value to DrawImage.
 func New(r io.Reader, options *Options) (image.Image, error) {
 	// Perform validation and corrections on options
 	var opt Options
@@ -158,7 +158,7 @@ func New(r io.Reader, options *Options) (image.Image, error) {
 // struct may be passed to enable further customization; else, DefaultOptions.ComputeOptions is used.
 //
 // ComputeValues is typically used once on an audio stream, to read and calculate the values
-// used for subsequent waveform generations.  Its return value can be used with ImageFromValues to
+// used for subsequent waveform generations.  Its return value can be used with DrawImage to
 // generate and customize multiple waveform images from a single stream.
 func ComputeValues(r io.Reader, options *ComputeOptions) ([]float64, error) {
 	// Perform validation and corrections on options
@@ -174,14 +174,14 @@ func ComputeValues(r io.Reader, options *ComputeOptions) ([]float64, error) {
 	return readAndComputeSamples(r, opt.ComputeOptions)
 }
 
-// ImageFromValues creates a new image.Image from a slice of float64 values.  An ImageOptions struct
+// DrawImage creates a new image.Image from a slice of float64 values.  An ImageOptions struct
 // may be passed to enable further customization; else, DefaultOptions.ImageOptions is used.
 //
-// ImageFromValues is typically used after a waveform has been computed one time, and a slice of
+// DrawImage is typically used after a waveform has been computed one time, and a slice of
 // computed values was returned from the first computation.  Subsequent waveform generations from
 // the same audio stream can be generated and customized much more quickly using this function,
 // rather than calling New again.
-func ImageFromValues(values []float64, options *ImageOptions) image.Image {
+func DrawImage(values []float64, options *ImageOptions) image.Image {
 	// Perform validation and corrections on options
 	var opt Options
 	if options == nil {

@@ -29,34 +29,34 @@ func BenchmarkComputeValuesFLAC(b *testing.B) {
 	benchmarkComputeValues(b, flacFile, nil)
 }
 
-// BenchmarkImageFromValues60 checks the performance of the ImageFromValues() function
+// BenchmarkDrawImage60 checks the performance of the DrawImage() function
 // with approximately 60 seconds of computed values
-func BenchmarkImageFromValues60(b *testing.B) {
-	benchmarkImageFromValues(b, 60, nil)
+func BenchmarkDrawImage60(b *testing.B) {
+	benchmarkDrawImage(b, 60, nil)
 }
 
-// BenchmarkImageFromValues120 checks the performance of the ImageFromValues() function
+// BenchmarkDrawImage120 checks the performance of the DrawImage() function
 // with approximately 120 seconds of computed values
-func BenchmarkImageFromValues120(b *testing.B) {
-	benchmarkImageFromValues(b, 120, nil)
+func BenchmarkDrawImage120(b *testing.B) {
+	benchmarkDrawImage(b, 120, nil)
 }
 
-// BenchmarkImageFromValues240 checks the performance of the ImageFromValues() function
+// BenchmarkDrawImage240 checks the performance of the DrawImage() function
 // with approximately 240 seconds of computed values
-func BenchmarkImageFromValues240(b *testing.B) {
-	benchmarkImageFromValues(b, 240, nil)
+func BenchmarkDrawImage240(b *testing.B) {
+	benchmarkDrawImage(b, 240, nil)
 }
 
-// BenchmarkImageFromValues480 checks the performance of the ImageFromValues() function
+// BenchmarkDrawImage480 checks the performance of the DrawImage() function
 // with approximately 480 seconds of computed values
-func BenchmarkImageFromValues480(b *testing.B) {
-	benchmarkImageFromValues(b, 480, nil)
+func BenchmarkDrawImage480(b *testing.B) {
+	benchmarkDrawImage(b, 480, nil)
 }
 
-// BenchmarkImageFromValues960 checks the performance of the ImageFromValues() function
+// BenchmarkDrawImage960 checks the performance of the DrawImage() function
 // with approximately 960 seconds of computed values
-func BenchmarkImageFromValues960(b *testing.B) {
-	benchmarkImageFromValues(b, 960, nil)
+func BenchmarkDrawImage960(b *testing.B) {
+	benchmarkDrawImage(b, 960, nil)
 }
 
 // BenchmarkRMSF64Samples22050 checks the performance of the RMSF64Samples() function
@@ -97,11 +97,11 @@ func benchmarkComputeValues(b *testing.B, data []byte, options *ComputeOptions) 
 	}
 }
 
-// benchmarkImageFromValues contains common logic for benchmarking ImageFromValues
-func benchmarkImageFromValues(b *testing.B, count int, options *ImageOptions) {
+// benchmarkDrawImage contains common logic for benchmarking DrawImage
+func benchmarkDrawImage(b *testing.B, count int, options *ImageOptions) {
 	values := make([]float64, count)
 	for i := 0; i < b.N; i++ {
-		ImageFromValues(values, options)
+		DrawImage(values, options)
 	}
 }
 

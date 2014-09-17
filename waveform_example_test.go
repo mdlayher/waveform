@@ -67,9 +67,9 @@ func ExampleComputeValues() {
 	// values: 5
 }
 
-// ExampleImageFromValues provides example usage of ImageFromValues, using randomly
+// ExampleDrawImage provides example usage of DrawImage, using randomly
 // generated values.
-func ExampleImageFromValues() {
+func ExampleDrawImage() {
 	rand.Seed(time.Now().UnixNano())
 
 	// Generate random float64 values
@@ -80,7 +80,7 @@ func ExampleImageFromValues() {
 	fmt.Println("values:", len(values))
 
 	// Directly generate waveform image from random float64 values
-	img := ImageFromValues(values, nil)
+	img := DrawImage(values, nil)
 	fmt.Println("bounds:", img.Bounds())
 
 	// Output:
