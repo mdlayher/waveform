@@ -209,6 +209,61 @@ func Test_readAndComputeSamples(t *testing.T) {
 	}
 }
 
+// Test_generateImage verifies that generateImage creates an output image with expected
+// characteristics, based upon input ImageOptions.
+func Test_generateImage(t *testing.T) {
+	// Values used for tests
+	clippingValues := []float64{1.0, 1.0, 1.0, 1.0, 1.0}
+
+	defaultBounds := "(0,0)-(5,128)"
+
+	rgbaBlack := color.RGBA{0, 0, 0, 255}
+	rgbaWhite := color.RGBA{255, 255, 255, 255}
+	rgbaRed := color.RGBA{255, 0, 0, 255}
+
+	// Test table to iterate and check conditions
+	var tests = []struct {
+		values   []float64
+		options  ImageOptions
+		bounds   string
+		fgColor  color.Color
+		altColor color.Color
+	}{
+		// Clipping values, no scaling
+		{clippingValues, ImageOptions{}, defaultBounds, rgbaBlack, rgbaBlack},
+		// Clipping values, add scaling
+		{clippingValues, ImageOptions{ScaleClipping: true}, defaultBounds, rgbaWhite, rgbaWhite},
+		// Clipping values, alternate color
+		{clippingValues, ImageOptions{AlternateColor: rgbaRed}, defaultBounds, rgbaRed, rgbaBlack},
+	}
+
+	// Draw an image for each test
+	for i, test := range tests {
+		img := DrawImage(test.values, &test.options)
+
+		// Verify bounds are valid
+		if bounds := img.Bounds().String(); bounds != test.bounds {
+			t.Fatalf("[%02d] unexpected bounds: %v != %v", i, bounds, test.bounds)
+		}
+
+		// Verify valid color model (always RGBA)
+		if model := img.ColorModel(); model != color.RGBAModel {
+			t.Fatalf("[%02d] unexpected color model: %v != %v", i, model, color.RGBAModel)
+		}
+
+		// Test for expected foreground color
+		if expColor := img.At(0, 0); expColor != test.fgColor {
+			t.Fatalf("[%02d] unexpected foreground color: %v != %v", i, expColor, test.fgColor)
+		}
+
+		// Test for expected alternate color (the actual foreground color in this case, because
+		// the algorithm stripes even bands only)
+		if expColor := img.At(1, 0); expColor != test.altColor {
+			t.Fatalf("[%02d] unexpected alternate color: %v != %v", i, expColor, test.altColor)
+		}
+	}
+}
+
 // TestRMSF64Samples verifies that RMSF64Samples computes correct results
 func TestRMSF64Samples(t *testing.T) {
 	var tests = []struct {
