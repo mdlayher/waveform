@@ -43,7 +43,7 @@ var (
 
 var (
 	// errNilFunction is returned when an input SampleReduceFunc is nil.
-	errNilFunction = errors.New("waveform: nil SampleRedunceFunc")
+	errNilFunction = errors.New("waveform: nil SampleReduceFunc")
 
 	// errZeroResolution is returned when input Resolution is 0.
 	errZeroResolution = errors.New("waveform: zero Resolution")
