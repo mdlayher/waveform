@@ -9,54 +9,54 @@ import (
 	"azul3d.org/audio.v1"
 )
 
-// BenchmarkNewWAV checks the performance of the New() function with a WAV file
-func BenchmarkNewWAV(b *testing.B) {
-	benchmarkNew(b, wavFile, nil)
+// BenchmarkGenerateWAV checks the performance of the Generate() function with a WAV file
+func BenchmarkGenerateWAV(b *testing.B) {
+	benchmarkGenerate(b, wavFile)
 }
 
-// BenchmarkNewFLAC checks the performance of the New() function with a FLAC file
-func BenchmarkNewFLAC(b *testing.B) {
-	benchmarkNew(b, flacFile, nil)
+// BenchmarkGenerateFLAC checks the performance of the Generate() function with a FLAC file
+func BenchmarkGenerateFLAC(b *testing.B) {
+	benchmarkGenerate(b, flacFile)
 }
 
-// BenchmarkComputeValuesWAV checks the performance of the ComputeValues() function with a WAV file
-func BenchmarkComputeValuesWAV(b *testing.B) {
-	benchmarkComputeValues(b, wavFile, nil)
+// BenchmarkWaveformComputeWAV checks the performance of the WaveformCompute() function with a WAV file
+func BenchmarkWaveformComputeWAV(b *testing.B) {
+	benchmarkWaveformCompute(b, wavFile)
 }
 
-// BenchmarkComputeValuesFLAC checks the performance of the ComputeValues() function with a FLAC file
-func BenchmarkComputeValuesFLAC(b *testing.B) {
-	benchmarkComputeValues(b, flacFile, nil)
+// BenchmarkWaveformComputeFLAC checks the performance of the WaveformCompute() function with a FLAC file
+func BenchmarkWaveformComputeFLAC(b *testing.B) {
+	benchmarkWaveformCompute(b, flacFile)
 }
 
-// BenchmarkDrawImage60 checks the performance of the DrawImage() function
+// BenchmarkWaveformDraw60 checks the performance of the WaveformDraw() function
 // with approximately 60 seconds of computed values
-func BenchmarkDrawImage60(b *testing.B) {
-	benchmarkDrawImage(b, 60, nil)
+func BenchmarkWaveformDraw60(b *testing.B) {
+	benchmarkWaveformDraw(b, 60)
 }
 
-// BenchmarkDrawImage120 checks the performance of the DrawImage() function
+// BenchmarkWaveformDraw120 checks the performance of the WaveformDraw() function
 // with approximately 120 seconds of computed values
-func BenchmarkDrawImage120(b *testing.B) {
-	benchmarkDrawImage(b, 120, nil)
+func BenchmarkWaveformDraw120(b *testing.B) {
+	benchmarkWaveformDraw(b, 120)
 }
 
-// BenchmarkDrawImage240 checks the performance of the DrawImage() function
+// BenchmarkWaveformDraw240 checks the performance of the WaveformDraw() function
 // with approximately 240 seconds of computed values
-func BenchmarkDrawImage240(b *testing.B) {
-	benchmarkDrawImage(b, 240, nil)
+func BenchmarkWaveformDraw240(b *testing.B) {
+	benchmarkWaveformDraw(b, 240)
 }
 
-// BenchmarkDrawImage480 checks the performance of the DrawImage() function
+// BenchmarkWaveformDraw480 checks the performance of the WaveformDraw() function
 // with approximately 480 seconds of computed values
-func BenchmarkDrawImage480(b *testing.B) {
-	benchmarkDrawImage(b, 480, nil)
+func BenchmarkWaveformDraw480(b *testing.B) {
+	benchmarkWaveformDraw(b, 480)
 }
 
-// BenchmarkDrawImage960 checks the performance of the DrawImage() function
+// BenchmarkWaveformDraw960 checks the performance of the WaveformDraw() function
 // with approximately 960 seconds of computed values
-func BenchmarkDrawImage960(b *testing.B) {
-	benchmarkDrawImage(b, 960, nil)
+func BenchmarkWaveformDraw960(b *testing.B) {
+	benchmarkWaveformDraw(b, 960)
 }
 
 // BenchmarkRMSF64Samples22050 checks the performance of the RMSF64Samples() function
@@ -83,25 +83,35 @@ func BenchmarkRMSF64Samples176400(b *testing.B) {
 	benchmarkRMSF64Samples(b, 176400)
 }
 
-// benchmarkNew contains common logic for benchmarking New
-func benchmarkNew(b *testing.B, data []byte, options *Options) {
+// benchmarkGenerate contains common logic for benchmarking Generate
+func benchmarkGenerate(b *testing.B, data []byte) {
 	for i := 0; i < b.N; i++ {
-		New(bytes.NewReader(data), options)
+		Generate(bytes.NewReader(data))
 	}
 }
 
-// benchmarkComputeValues contains common logic for benchmarking ComputeValues
-func benchmarkComputeValues(b *testing.B, data []byte, options *ComputeOptions) {
+// benchmarkWaveformCompute contains common logic for benchmarking Waveform.Compute
+func benchmarkWaveformCompute(b *testing.B, data []byte) {
 	for i := 0; i < b.N; i++ {
-		ComputeValues(bytes.NewReader(data), options)
+		w, err := New(bytes.NewReader(data))
+		if err != nil {
+			panic(err)
+		}
+
+		w.Compute()
 	}
 }
 
-// benchmarkDrawImage contains common logic for benchmarking DrawImage
-func benchmarkDrawImage(b *testing.B, count int, options *ImageOptions) {
+// benchmarkWaveformDraw contains common logic for benchmarking Waveform.Draw
+func benchmarkWaveformDraw(b *testing.B, count int) {
 	values := make([]float64, count)
 	for i := 0; i < b.N; i++ {
-		DrawImage(values, options)
+		w, err := New(nil)
+		if err != nil {
+			panic(err)
+		}
+
+		w.Draw(values)
 	}
 }
 
