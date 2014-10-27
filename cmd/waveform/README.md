@@ -13,30 +13,27 @@ for generating waveform images:
 ```
 $ waveform -h
 Usage of waveform:
-  -alt-color="": hex alternate color of output waveform image
-  -bg-color="#FFFFFF": hex background color of output waveform image
-  -fg-color="#000000": hex foreground color of output waveform image
-  -in="": input audio file
-  -out="": output PNG waveform image file
+  -alt="": hex alternate color of output waveform image
+  -bg="#FFFFFF": hex background color of output waveform image
+  -fg="#000000": hex foreground color of output waveform image
   -resolution=1: number of times audio is read and drawn per second of audio
   -sharpness=1: sharpening factor used to add curvature to a scaled image
   -x=1: scaling factor for image X-axis
   -y=1: scaling factor for image Y-axis
 ```
 
-The most basic usage requires the `-in` and `-out` parameters.  `waveform` currently supports
-both WAV and FLAC audio files.
+`waveform` currently supports both WAV and FLAC audio files.  An audio stream must
+be passed on `stdin`, and the resulting, PNG-encoded image will be written to `stdout`.
+Any errors which occur will be written to `stderr`.
 
 Example
 =======
 
-Use `waveform` to generate a waveform image from a FLAC audio file, and scale it both vertically
-and horizontally.
+Use `waveform` to generate a waveform image from a FLAC audio file, and scale it both
+vertically and horizontally.
 
 ```
-$ waveform -in ~/Music/FLAC/Boston/1976\ -\ Boston/02\ -\ Peace\ Of\ Mind.flac -out ~/waveform.png -x 5 -y 2
-waveform: 2014/09/13 15:55:09 audio: /home/matt/Music/FLAC/Boston/1976 - Boston/02 - Peace Of Mind.flac
-waveform: 2014/09/13 15:55:12 image: /home/matt/waveform.png
+$ cat ~/Music/FLAC/Boston/1976\ -\ Boston/02\ -\ Peace\ Of\ Mind.flac | waveform -x 5 -y 2 > ~/waveform.png
 ```
 
 The result is a waveform image, located at `~/waveform.png`:

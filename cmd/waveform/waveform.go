@@ -1,7 +1,9 @@
+// Command waveform is a simple utility which reads an audio file from stdin,
+// processes it into a waveform image using input flags, and writes a PNG image
+// of the generated waveform to stdout.
 package main
 
 import (
-	"errors"
 	"flag"
 	"image/color"
 	"image/png"
@@ -18,26 +20,14 @@ const (
 )
 
 var (
-	// ErrMissingParameters is returned when required input and output filenames are not
-	// passed via command-line flags.
-	ErrMissingParameters = errors.New(app + ": missing required parameters: -in, -out")
-)
-
-var (
-	// inFilename is the file name of the input audio file
-	inFilename = flag.String("in", "", "input audio file")
-
-	// inFilename is the file name of the output waveform PNG image file
-	outFilename = flag.String("out", "", "output PNG waveform image file")
-
 	// strBGColor is the hex color value used to color the background of the waveform image
-	strBGColor = flag.String("bg-color", "#FFFFFF", "hex background color of output waveform image")
+	strBGColor = flag.String("bg", "#FFFFFF", "hex background color of output waveform image")
 
 	// strFGColor is the hex color value used to color the foreground of the waveform image
-	strFGColor = flag.String("fg-color", "#000000", "hex foreground color of output waveform image")
+	strFGColor = flag.String("fg", "#000000", "hex foreground color of output waveform image")
 
 	// strAltColor is the hex color value used to set the alternate color of the waveform image
-	strAltColor = flag.String("alt-color", "", "hex alternate color of output waveform image")
+	strAltColor = flag.String("alt", "", "hex alternate color of output waveform image")
 
 	// resolution is the number of times audio is read and the waveform is drawn,
 	// per second of audio
@@ -55,22 +45,13 @@ var (
 )
 
 func main() {
-	// Parse flags and check for required parameters
+	// Parse flags
 	flag.Parse()
-	if *inFilename == "" || *outFilename == "" {
-		log.Fatal(ErrMissingParameters)
-	}
 
+	// Move all logging output to stderr, as output image will occupy
+	// the stdout stream
+	log.SetOutput(os.Stderr)
 	log.SetPrefix(app + ": ")
-
-	// Open input audio file, exit if it is not valid
-	audioFile, err := os.Open(*inFilename)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer audioFile.Close()
-
-	log.Printf("audio: %s", audioFile.Name())
 
 	// Create image background color from input hex color string, or default
 	// to black if invalid
@@ -90,9 +71,9 @@ func main() {
 		altColor = color.RGBA{colorR, colorG, colorB, 255}
 	}
 
-	// Generate a waveform image from the input file, using values passed from
+	// Generate a waveform image from stdin, using values passed from
 	// flags as options
-	img, err := waveform.Generate(audioFile,
+	img, err := waveform.Generate(os.Stdin,
 		waveform.Colors(fgColor, bgColor, altColor),
 		waveform.Resolution(*resolution),
 		waveform.Scale(*scaleX, *scaleY),
@@ -116,16 +97,8 @@ func main() {
 		panic(err)
 	}
 
-	// Attempt to create output image file
-	imageFile, err := os.Create(*outFilename)
-	if err != nil {
-		panic(err)
-	}
-	defer imageFile.Close()
-
-	// Encode results into output file
-	log.Printf("image: %s", imageFile.Name())
-	if err := png.Encode(imageFile, img); err != nil {
+	// Encode results as PNG to stdout
+	if err := png.Encode(os.Stdout, img); err != nil {
 		panic(err)
 	}
 }
