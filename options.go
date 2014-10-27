@@ -181,21 +181,22 @@ func (w *Waveform) setScale(x uint, y uint) error {
 	return nil
 }
 
-// ScaleClipping generates an OptionsFunc which applies the input scaleClipping
-// value to an input Waveform struct.
+// ScaleClipping generates an OptionsFunc which sets the scaleClipping member
+// to true on an input Waveform struct.
 //
 // This value indicates if the waveform image should be scaled down on its Y-axis
 // when clipping thresholds are reached.  This can be used to show a more accurate
 // waveform when the input audio stream exhibits signs of clipping.
-func ScaleClipping(scaleClipping bool) func(*Waveform) error {
+func ScaleClipping() func(*Waveform) error {
 	return func(w *Waveform) error {
-		return w.setScaleClipping(scaleClipping)
+		return w.setScaleClipping(true)
 	}
 }
 
-// SetScaleClipping applies the input scaleClipping to the receiving Waveform struct.
-func (w *Waveform) SetScaleClipping(scaleClipping bool) error {
-	return w.SetOptions(ScaleClipping(scaleClipping))
+// SetScaleClipping applies sets the scaleClipping member true for the receiving
+// Waveform struct.
+func (w *Waveform) SetScaleClipping() error {
+	return w.SetOptions(ScaleClipping())
 }
 
 // setScaleClipping directly sets the scaleClipping member of the receiving Waveform

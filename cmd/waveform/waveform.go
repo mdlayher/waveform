@@ -96,7 +96,7 @@ func main() {
 		waveform.Colors(fgColor, bgColor, altColor),
 		waveform.Resolution(*resolution),
 		waveform.Scale(*scaleX, *scaleY),
-		waveform.ScaleClipping(true),
+		waveform.ScaleClipping(),
 		waveform.Sharpness(*sharpness),
 	)
 	if err != nil {
