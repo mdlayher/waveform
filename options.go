@@ -36,7 +36,7 @@ func (w *Waveform) SetOptions(options ...OptionsFunc) error {
 // If an alternate color is specified, it will be alternated with the
 // foreground color to create a stripe effect in the image.
 // If alternate color is set to nil, no alternate color will be used.
-func Colors(fg color.Color, bg color.Color, alt color.Color) func(*Waveform) error {
+func Colors(fg color.Color, bg color.Color, alt color.Color) OptionsFunc {
 	return func(w *Waveform) error {
 		return w.setColors(fg, bg, alt)
 	}
@@ -80,7 +80,7 @@ func (w *Waveform) setColors(fg color.Color, bg color.Color, alt color.Color) er
 // This function is used to compute values from audio samples, for use in
 // waveform generation.  The function is applied over a slice of float64
 // audio samples, reducing them to a single value.
-func Function(function SampleReduceFunc) func(*Waveform) error {
+func Function(function SampleReduceFunc) OptionsFunc {
 	return func(w *Waveform) error {
 		return w.setFunction(function)
 	}
@@ -112,7 +112,7 @@ func (w *Waveform) setFunction(function SampleReduceFunc) error {
 //
 // This value indicates the number of times audio is read and drawn
 // as a waveform, per second of audio.
-func Resolution(resolution uint) func(*Waveform) error {
+func Resolution(resolution uint) OptionsFunc {
 	return func(w *Waveform) error {
 		return w.setResolution(resolution)
 	}
@@ -144,7 +144,7 @@ func (w *Waveform) setResolution(resolution uint) error {
 //
 // This value indicates how a generated waveform image will be scaled, for both
 // its X and Y axes.
-func Scale(x uint, y uint) func(*Waveform) error {
+func Scale(x uint, y uint) OptionsFunc {
 	return func(w *Waveform) error {
 		return w.setScale(x, y)
 	}
@@ -187,7 +187,7 @@ func (w *Waveform) setScale(x uint, y uint) error {
 // This value indicates if the waveform image should be scaled down on its Y-axis
 // when clipping thresholds are reached.  This can be used to show a more accurate
 // waveform when the input audio stream exhibits signs of clipping.
-func ScaleClipping() func(*Waveform) error {
+func ScaleClipping() OptionsFunc {
 	return func(w *Waveform) error {
 		return w.setScaleClipping(true)
 	}
@@ -213,7 +213,7 @@ func (w *Waveform) setScaleClipping(scaleClipping bool) error {
 // This value indicates the amount of curvature which is applied to a
 // waveform image, scaled on its X-axis.  A higher value results in steeper
 // curves, and a lower value results in more "blocky" curves.
-func Sharpness(sharpness uint) func(*Waveform) error {
+func Sharpness(sharpness uint) OptionsFunc {
 	return func(w *Waveform) error {
 		return w.setSharpness(sharpness)
 	}
