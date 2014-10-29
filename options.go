@@ -1,6 +1,53 @@
 package waveform
 
-import "image/color"
+import (
+	"fmt"
+	"image/color"
+)
+
+var (
+	// errColorsNilForeground is returned when a nil foreground color is
+	// used in a call to Colors.
+	errColorsNilForeground = &OptionsError{
+		Option: "colors",
+		Reason: "foreground color cannot be nil",
+	}
+
+	// errColorsNilBackground is returned when a nil background color is
+	// used in a call to Colors.
+	errColorsNilBackground = &OptionsError{
+		Option: "colors",
+		Reason: "background color cannot be nil",
+	}
+
+	// errFunctionNil is returned when a nil SampleReduceFunc is used in
+	// a call to Function.
+	errFunctionNil = &OptionsError{
+		Option: "function",
+		Reason: "function cannot be nil",
+	}
+
+	// errResolutionZero is returned when integer 0 is used in a call
+	// to Resolution.
+	errResolutionZero = &OptionsError{
+		Option: "resolution",
+		Reason: "resolution cannot be 0",
+	}
+
+	// errScaleXZero is returned when integer 0 is used as the X value
+	// in a call to Scale.
+	errScaleXZero = &OptionsError{
+		Option: "scale",
+		Reason: "X scale cannot be 0",
+	}
+
+	// errScaleYZero is returned when integer 0 is used as the Y value
+	// in a call to Scale.
+	errScaleYZero = &OptionsError{
+		Option: "scale",
+		Reason: "Y scale cannot be 0",
+	}
+)
 
 // OptionsError is an error which is returned when invalid input
 // options are set on a Waveform struct.
@@ -11,7 +58,7 @@ type OptionsError struct {
 
 // Error returns the string representation of an OptionsError.
 func (e *OptionsError) Error() string {
-	return e.Option + ": " + e.Reason
+	return fmt.Sprintf("%s: %s", e.Option, e.Reason)
 }
 
 // OptionsFunc is a function which is applied to an input Waveform
@@ -53,18 +100,12 @@ func (w *Waveform) SetColors(fg color.Color, bg color.Color, alt color.Color) er
 func (w *Waveform) setColors(fg color.Color, bg color.Color, alt color.Color) error {
 	// Foreground color cannot be nil
 	if fg == nil {
-		return &OptionsError{
-			Option: "colors",
-			Reason: "foreground color cannot be nil",
-		}
+		return errColorsNilForeground
 	}
 
 	// Background color cannot be nil
 	if bg == nil {
-		return &OptionsError{
-			Option: "colors",
-			Reason: "background color cannot be nil",
-		}
+		return errColorsNilBackground
 	}
 
 	w.fg = fg
@@ -96,10 +137,7 @@ func (w *Waveform) SetFunction(function SampleReduceFunc) error {
 func (w *Waveform) setFunction(function SampleReduceFunc) error {
 	// Function cannot be nil
 	if function == nil {
-		return &OptionsError{
-			Option: "function",
-			Reason: "function cannot be nil",
-		}
+		return errFunctionNil
 	}
 
 	w.function = function
@@ -128,10 +166,7 @@ func (w *Waveform) SetResolution(resolution uint) error {
 func (w *Waveform) setResolution(resolution uint) error {
 	// Resolution cannot be zero
 	if resolution == 0 {
-		return &OptionsError{
-			Option: "resolution",
-			Reason: "resolution cannot be 0",
-		}
+		return errResolutionZero
 	}
 
 	w.resolution = resolution
@@ -161,18 +196,13 @@ func (w *Waveform) SetScale(x uint, y uint) error {
 func (w *Waveform) setScale(x uint, y uint) error {
 	// X scale cannot be zero
 	if x == 0 {
-		return &OptionsError{
-			Option: "scale",
-			Reason: "X scale cannot be 0",
-		}
+		return errScaleXZero
 	}
 
 	// Y scale cannot be zero
 	if y == 0 {
-		return &OptionsError{
-			Option: "scale",
-			Reason: "Y scale cannot be 0",
-		}
+		return errScaleYZero
+
 	}
 
 	w.scaleX = x
