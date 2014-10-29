@@ -69,9 +69,9 @@ type Waveform struct {
 	scaleClipping bool
 }
 
-// Generate immediately opens and reads an input audio streams, computes
+// Generate immediately opens and reads an input audio stream, computes
 // the values required for waveform generation, and returns a waveform image
-// which is customized via the input OptionsFunc slice.
+// which is customized by zero or more, variadic, OptionsFunc parameters.
 //
 // Generate is equivalent to calling New, followed by the Compute and Draw
 // methods of a Waveform struct.  In general, Generate should only be used
