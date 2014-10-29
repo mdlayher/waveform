@@ -121,34 +121,6 @@ func New(r io.Reader, options ...OptionsFunc) (*Waveform, error) {
 	return w, w.SetOptions(options...)
 }
 
-/*
-// ComputeOptions are used to customize the ComputeValues operation.
-type ComputeOptions struct {
-	// Function is used to specify an alternate SampleReduceFunc for use in waveform
-	// generation.  The function is applied over a slice of float64 audio samples,
-	// reducing them to a single value.
-	Function SampleReduceFunc
-}
-
-// ImageOptions are used to customize the DrawImage operation.
-type ImageOptions struct {
-	// ScaleX and ScaleY are scaling factors used to scale a waveform image on its
-	// X or Y axis, respectively.
-	ScaleX uint
-	ScaleY uint
-
-	// Sharpness is used to apply a curve to a waveform image, scaled on its X-axis.
-	// A higher value results in steeper curves, and a lower value results in more
-	// "blocky" curves.
-	Sharpness uint
-
-	// ScaleClipping specifies if the waveform image should be scaled down on its
-	// Y-axis when clipping thresholds are reached.  This can be used to show a
-	// more accurate waveform, when a waveform exhibits signs of audio clipping.
-	ScaleClipping bool
-}
-*/
-
 // Compute creates a slice of float64 values, computed using an input function.
 //
 // Compute is typically used once on an audio stream, to read and calculate the values
