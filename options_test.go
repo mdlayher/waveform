@@ -94,6 +94,12 @@ func TestOptionSharpnessOK(t *testing.T) {
 	testWaveformOptionFunc(t, Sharpness(0), nil)
 }
 
+// TestWaveformSetOptionsNil verifies that Waveform.SetOptions ignores any
+// nil OptionsFunc arguments.
+func TestWaveformSetOptionsNil(t *testing.T) {
+	testWaveformOptionFunc(t, nil, nil)
+}
+
 // TestWaveformSetColors verifies that the Waveform.SetColors method properly
 // modifies struct members.
 func TestWaveformSetColors(t *testing.T) {
