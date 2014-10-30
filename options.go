@@ -69,6 +69,11 @@ type OptionsFunc func(*Waveform) error
 // struct, manipulating its properties.
 func (w *Waveform) SetOptions(options ...OptionsFunc) error {
 	for _, o := range options {
+		// Do not apply nil function arguments
+		if o == nil {
+			continue
+		}
+
 		if err := o(w); err != nil {
 			return err
 		}
