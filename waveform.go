@@ -2,7 +2,6 @@
 package waveform
 
 import (
-	"errors"
 	"image"
 	"image/color"
 	"image/draw"
@@ -39,14 +38,6 @@ var (
 	// ErrUnexpectedEOS is returned when end-of-stream is encountered in the middle
 	// of a fixed-size block or data structure.
 	ErrUnexpectedEOS = struct{ error }{audio.ErrUnexpectedEOS}
-)
-
-var (
-	// errNilFunction is returned when an input SampleReduceFunc is nil.
-	errNilFunction = errors.New("waveform: nil SampleReduceFunc")
-
-	// errZeroResolution is returned when input Resolution is 0.
-	errZeroResolution = errors.New("waveform: zero Resolution")
 )
 
 // Waveform is a struct which can be manipulated and used to generate
@@ -144,8 +135,13 @@ func (w *Waveform) Draw(values []float64) image.Image {
 // which occurred during the computation.
 func (w *Waveform) readAndComputeSamples() ([]float64, error) {
 	// Validate struct members
+	// These checks are also done when applying options, but verifying them here
+	// will prevent a runtime panic if called on an empty Waveform instance.
 	if w.function == nil {
-		return nil, errNilFunction
+		return nil, errFunctionNil
+	}
+	if w.resolution == 0 {
+		return nil, errResolutionZero
 	}
 
 	// Open audio decoder on input stream
