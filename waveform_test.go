@@ -112,6 +112,25 @@ func TestWaveformComputeOggVorbisErrFormat(t *testing.T) {
 	testWaveformCompute(t, bytes.NewReader(oggVorbisFile), ErrFormat, nil, nil)
 }
 
+// TestWaveformComputeFunctionNil verifies that the Waveform.Compute method returns an error
+// if a nil function member is set.
+func TestWaveformComputeFunctionNil(t *testing.T) {
+	if _, err := new(Waveform).Compute(); err != errFunctionNil {
+		t.Fatalf("unexpected Compute error: %v != %v", err, errFunctionNil)
+	}
+}
+
+// TestWaveformComputeResolutionZero verifies that the Waveform.Compute method returns an error
+// if the resolution member is 0.
+func TestWaveformComputeResolutionZero(t *testing.T) {
+	w := &Waveform{
+		function: RMSF64Samples,
+	}
+	if _, err := w.Compute(); err != errResolutionZero {
+		t.Fatalf("unexpected Compute error: %v != %v", err, errResolutionZero)
+	}
+}
+
 // testWaveformCompute is a test helper which verifies that generating a Waveform
 // from an input io.Reader, applying the appropriate OptionsFunc, and calling its
 // Compute method, will produce the appropriate computed values and error.
