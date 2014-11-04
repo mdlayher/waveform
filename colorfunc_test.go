@@ -23,7 +23,8 @@ func TestSolidColor(t *testing.T) {
 	}
 
 	for i, c := range colors {
-		if out := SolidColor(i, i, i, c); out != c {
+		fn := SolidColor(c)
+		if out := fn(i, i, i); out != c {
 			t.Fatalf("unexpected SolidColor color: %v != %v", out, c)
 		}
 	}
@@ -72,7 +73,7 @@ func testFuzzColor(t *testing.T, in []color.Color) {
 	// the input slice.
 	fn := FuzzColor(in...)
 	for i := 0; i < 10000; i++ {
-		if out, ok := set[fn(i, i, i, nil).(color.RGBA)]; !ok {
+		if out, ok := set[fn(i, i, i).(color.RGBA)]; !ok {
 			t.Fatalf("color not in set: %v", out)
 		}
 	}
@@ -83,7 +84,7 @@ func testStripeColor(t *testing.T, in []color.Color, out []color.Color) {
 	// Validate that StripeColor produces expected output at each index
 	fn := StripeColor(in...)
 	for i := 0; i < len(out); i++ {
-		if c := fn(i, 0, 0, nil); c != out[i] {
+		if c := fn(i, 0, 0); c != out[i] {
 			t.Fatalf("[%02d] unexpected output color: %v != %v", i, c, out[i])
 		}
 	}

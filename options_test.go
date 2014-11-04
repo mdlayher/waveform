@@ -52,7 +52,7 @@ func TestOptionColorsNilBackground(t *testing.T) {
 // TestOptionColorFunctionOK verifies that ColorFunction returns no error
 // with acceptable input.
 func TestOptionColorFunctionOK(t *testing.T) {
-	testWaveformOptionFunc(t, ColorFunction(SolidColor), nil)
+	testWaveformOptionFunc(t, ColorFunction(SolidColor(color.Black)), nil)
 }
 
 // TestOptionColorFunctionNil verifies that ColorFunction does not accept
@@ -141,7 +141,7 @@ func TestWaveformSetColors(t *testing.T) {
 func TestWaveformSetColorFunction(t *testing.T) {
 	// Generate empty Waveform, apply parameters
 	w := &Waveform{}
-	if err := w.SetColorFunction(SolidColor); err != nil {
+	if err := w.SetColorFunction(SolidColor(color.Black)); err != nil {
 		t.Fatal(err)
 	}
 

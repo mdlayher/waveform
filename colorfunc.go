@@ -6,20 +6,13 @@ import (
 	"time"
 )
 
-// ColorFunc is a function which accepts a computed value count, X and Y
-// coordinates, and a default color value.
+// ColorFunc is a function which accepts a computed value count, and X and Y
+// coordinate values.
 //
 // A ColorFunc is applied during each image drawing iteration, and will
 // return the appropriate color which should be drawn at the specified X and Y
 // coordinate, based upon the return of the function.
-type ColorFunc func(count int, x int, y int, color color.Color) color.Color
-
-// SolidColor is a ColorFunc which simply returns the input, default color
-// as the color which should be drawn at all coordinates.  This is the default
-// behavior of the waveform package.
-func SolidColor(count int, x int, y int, color color.Color) color.Color {
-	return color
-}
+type ColorFunc func(count int, x int, y int) color.Color
 
 // FuzzColor generates a ColorFunc which applies a random color on each call,
 // selected from an input, variadic slice of colors.  This can be used to create
@@ -32,8 +25,18 @@ func FuzzColor(colors ...color.Color) ColorFunc {
 	rand.Seed(time.Now().UnixNano())
 
 	// Select a color at random on each call
-	return func(count int, x int, y int, inColor color.Color) color.Color {
+	return func(count int, x int, y int) color.Color {
 		return colors[rand.Intn(len(colors))]
+	}
+}
+
+// SolidColor generates a ColorFunc which simply returns the input color
+// as the color which should be drawn at all coordinates.
+//
+// This is the default behavior of the waveform package.
+func SolidColor(inColor color.Color) ColorFunc {
+	return func(count int, x int, y int) color.Color {
+		return inColor
 	}
 }
 
@@ -46,7 +49,7 @@ func StripeColor(colors ...color.Color) ColorFunc {
 	colors = filterNilColors(colors)
 
 	var lastCount int
-	return func(count int, x int, y int, inColor color.Color) color.Color {
+	return func(count int, x int, y int) color.Color {
 		// For each new count value, use the next color in the slice
 		if count > lastCount {
 			lastCount = count

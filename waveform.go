@@ -97,7 +97,7 @@ func New(r io.Reader, options ...OptionsFunc) (*Waveform, error) {
 		fg: color.Black,
 
 		// Generate solid color waveform with ColorFunc
-		colorFn: SolidColor,
+		colorFn: SolidColor(color.Black),
 
 		// No scaling
 		scaleX: 1,
@@ -286,8 +286,7 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 				// count, and X and Y coordinates.
 				// The output color is selected using the function, and is applied to
 				// the resulting image.
-				color := w.colorFn(count, x+i, y+adjust, w.fg)
-				img.Set(x+i, y+adjust, color)
+				img.Set(x+i, y+adjust, w.colorFn(count, x+i, y+adjust))
 			}
 		}
 

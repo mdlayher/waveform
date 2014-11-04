@@ -86,7 +86,7 @@ func main() {
 	// Set of available functions
 	fnSet := map[string]waveform.ColorFunc{
 		fnFuzz:   waveform.FuzzColor(fgColor, altColor),
-		fnSolid:  waveform.SolidColor,
+		fnSolid:  waveform.SolidColor(fgColor),
 		fnStripe: waveform.StripeColor(fgColor, altColor),
 	}
 
