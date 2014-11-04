@@ -5,6 +5,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image/color"
 	"image/png"
 	"log"
@@ -17,6 +18,11 @@ import (
 const (
 	// app is the name of this application
 	app = "waveform"
+
+	// Names of available color functions
+	fnFuzz   = "fuzz"
+	fnSolid  = "solid"
+	fnStripe = "stripe"
 )
 
 var (
@@ -42,7 +48,13 @@ var (
 	// sharpness is the factor used to add curvature to a scaled image, preventing
 	// "blocky" images at higher scaling
 	sharpness = flag.Uint("sharpness", 1, "sharpening factor used to add curvature to a scaled image")
+
+	// strFn is an identifier which selects the ColorFunc used to color the waveform image
+	strFn = flag.String("fn", fnSolid, "function used to color output waveform image "+fnOptions)
 )
+
+// fnOptions is the help string which lists available options
+var fnOptions = fmt.Sprintf("[options: %s, %s, %s]", fnFuzz, fnSolid, fnStripe)
 
 func main() {
 	// Parse flags
@@ -71,11 +83,24 @@ func main() {
 		altColor = color.RGBA{colorR, colorG, colorB, 255}
 	}
 
+	// Set of available functions
+	fnSet := map[string]waveform.ColorFunc{
+		fnFuzz:   waveform.FuzzColor(fgColor, altColor),
+		fnSolid:  waveform.SolidColor,
+		fnStripe: waveform.StripeColor(fgColor, altColor),
+	}
+
+	// Validate user-selected function
+	colorFn, ok := fnSet[*strFn]
+	if !ok {
+		log.Fatalf("unknown function: %q %s", *strFn, fnOptions)
+	}
+
 	// Generate a waveform image from stdin, using values passed from
 	// flags as options
 	img, err := waveform.Generate(os.Stdin,
 		waveform.Colors(fgColor, bgColor),
-		waveform.ColorFunction(waveform.StripeColor(fgColor, altColor)),
+		waveform.ColorFunction(colorFn),
 		waveform.Resolution(*resolution),
 		waveform.Scale(*scaleX, *scaleY),
 		waveform.ScaleClipping(),
