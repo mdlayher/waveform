@@ -51,7 +51,7 @@ type Waveform struct {
 	fg color.Color
 	bg color.Color
 
-	colorFn ColorFunc
+	fgColorFn ColorFunc
 
 	scaleX uint
 	scaleY uint
@@ -96,8 +96,8 @@ func New(r io.Reader, options ...OptionsFunc) (*Waveform, error) {
 		bg: color.White,
 		fg: color.Black,
 
-		// Generate solid color waveform with ColorFunc
-		colorFn: SolidColor(color.Black),
+		// Generate solid foreground color waveform with ColorFunc
+		fgColorFn: SolidColor(color.Black),
 
 		// No scaling
 		scaleX: 1,
@@ -286,7 +286,7 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 				// count, and X and Y coordinates.
 				// The output color is selected using the function, and is applied to
 				// the resulting image.
-				img.Set(x+i, y+adjust, w.colorFn(count, x+i, y+adjust))
+				img.Set(x+i, y+adjust, w.fgColorFn(count, x+i, y+adjust))
 			}
 		}
 

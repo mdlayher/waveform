@@ -20,10 +20,10 @@ var (
 		Reason: "background color cannot be nil",
 	}
 
-	// errColorFunctionNil is returned when a nil ColorFunc is used in
-	// a call to ColorFunc.
-	errColorFunctionNil = &OptionsError{
-		Option: "colorFunction",
+	// errFGColorFunctionNil is returned when a nil ColorFunc is used in
+	// a call to FGColorFunction.
+	errFGColorFunctionNil = &OptionsError{
+		Option: "fgColorFunction",
 		Reason: "function cannot be nil",
 	}
 
@@ -122,32 +122,33 @@ func (w *Waveform) setColors(fg color.Color, bg color.Color) error {
 	return nil
 }
 
-// ColorFunction generates an OptionsFunc which applies the input ColorFunc
-// to an input Waveform struct.
+// FGColorFunction generates an OptionsFunc which applies the input foreground
+// ColorFunc to an input Waveform struct.
 //
-// This function is used to apply a variety of color schemes to a waveform
-// image, and is called during each drawing loop of the foreground image.
-func ColorFunction(function ColorFunc) OptionsFunc {
+// This function is used to apply a variety of color schemes to the foreground
+// of a waveform image, and is called during each drawing loop of the foreground
+// image.
+func FGColorFunction(function ColorFunc) OptionsFunc {
 	return func(w *Waveform) error {
-		return w.setColorFunction(function)
+		return w.setFGColorFunction(function)
 	}
 }
 
-// SetColorFunction applies the input ColorFunc to the receiving Waveform
-// struct.
-func (w *Waveform) SetColorFunction(function ColorFunc) error {
-	return w.SetOptions(ColorFunction(function))
+// SetFGColorFunction applies the input ColorFunc to the receiving Waveform
+// struct for foreground use.
+func (w *Waveform) SetFGColorFunction(function ColorFunc) error {
+	return w.SetOptions(FGColorFunction(function))
 }
 
-// setColorFunction directly sets the ColorFunc member of the receiving
-// Waveform struct.
-func (w *Waveform) setColorFunction(function ColorFunc) error {
+// setFGColorFunction directly sets the foreground ColorFunc member of the
+// receiving Waveform struct.
+func (w *Waveform) setFGColorFunction(function ColorFunc) error {
 	// Function cannot be nil
 	if function == nil {
-		return errColorFunctionNil
+		return errFGColorFunctionNil
 	}
 
-	w.colorFn = function
+	w.fgColorFn = function
 
 	return nil
 }

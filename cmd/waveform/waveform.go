@@ -100,7 +100,7 @@ func main() {
 	// flags as options
 	img, err := waveform.Generate(os.Stdin,
 		waveform.Colors(fgColor, bgColor),
-		waveform.ColorFunction(colorFn),
+		waveform.FGColorFunction(colorFn),
 		waveform.Resolution(*resolution),
 		waveform.Scale(*scaleX, *scaleY),
 		waveform.ScaleClipping(),

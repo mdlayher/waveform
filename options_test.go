@@ -52,13 +52,13 @@ func TestOptionColorsNilBackground(t *testing.T) {
 // TestOptionColorFunctionOK verifies that ColorFunction returns no error
 // with acceptable input.
 func TestOptionColorFunctionOK(t *testing.T) {
-	testWaveformOptionFunc(t, ColorFunction(SolidColor(color.Black)), nil)
+	testWaveformOptionFunc(t, FGColorFunction(SolidColor(color.Black)), nil)
 }
 
 // TestOptionColorFunctionNil verifies that ColorFunction does not accept
 // a nil ColorReduceFunc.
 func TestOptionColorFunctionNil(t *testing.T) {
-	testWaveformOptionFunc(t, ColorFunction(nil), errColorFunctionNil)
+	testWaveformOptionFunc(t, FGColorFunction(nil), errFGColorFunctionNil)
 }
 
 // TestOptionSampleFunctionOK verifies that SampleFunction returns no error
@@ -136,18 +136,18 @@ func TestWaveformSetColors(t *testing.T) {
 	}
 }
 
-// TestWaveformSetColorFunction verifies that the Waveform.SetColorFunction
+// TestWaveformSetFGColorFunction verifies that the Waveform.SetFGColorFunction
 // method properly modifies struct members.
-func TestWaveformSetColorFunction(t *testing.T) {
+func TestWaveformSetFGColorFunction(t *testing.T) {
 	// Generate empty Waveform, apply parameters
 	w := &Waveform{}
-	if err := w.SetColorFunction(SolidColor(color.Black)); err != nil {
+	if err := w.SetFGColorFunction(SolidColor(color.Black)); err != nil {
 		t.Fatal(err)
 	}
 
 	// Validate that struct members are set properly
-	if w.colorFn == nil {
-		t.Fatalf("SetColorFunction failed, nil function member")
+	if w.fgColorFn == nil {
+		t.Fatalf("SetFGColorFunction failed, nil function member")
 	}
 }
 
