@@ -12,10 +12,39 @@ An example binary called `waveform` is provided which show's the library's usage
 Please see [cmd/waveform/README.md](https://github.com/mdlayher/waveform/blob/master/cmd/waveform/README.md)
 for details.
 
-Here is an example, generated using `waveform` from Boston's "Peace of Mind".
+Examples
+========
+
+Here are several example images generated using `waveform`.  Enjoy!
+
+Generate a waveform image, and scale it both vertically and horizontally.
 
 ```
-$ cat ~/Music/FLAC/Boston/1976\ -\ Boston/02\ -\ Peace\ Of\ Mind.flac | waveform -x 5 -y 2 > ~/waveform.png
+$ cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -x 5 -y 2 > ~/waveform.png
 ```
 
-![waveform](https://cloud.githubusercontent.com/assets/1926905/4261650/b020c3c2-3b78-11e4-933c-c0b81e282973.png)
+![waveform](https://cloud.githubusercontent.com/assets/1926905/4910038/6ce9f5d0-647a-11e4-8a93-ed54812d114d.png)
+
+Apply a foreground and background color, to make things more interesting.
+
+```
+cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF3300 -bg=#0099CC -x 5 -y 2 > ~/waveform_color.png
+```
+
+![waveform_color](https://cloud.githubusercontent.com/assets/1926905/4910043/757b0edc-647a-11e4-8ebd-73175246421d.png)
+
+Apply an alternate foreground color, draw using a stripe pattern.
+
+```
+cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF3300 -bg=#0099CC -alt=#FF9933 -fn stripe -x 5 -y 2 > ~/waveform_stripe.png
+```
+
+![waveform_stripe](https://cloud.githubusercontent.com/assets/1926905/4910067/a560f76a-647a-11e4-8562-c430134c1187.png)
+
+Apply an alternate foreground color, draw using a random fuzz pattern.
+
+```
+cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF3300 -bg=#0099CC -alt=#FF9933 -fn fuzz -x 5 -y 2 > ~/waveform_fuzz.png
+```
+
+![waveform_fuzz](https://cloud.githubusercontent.com/assets/1926905/4910076/c6aa0e70-647a-11e4-8385-754960c9f074.png)
