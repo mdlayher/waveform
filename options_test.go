@@ -49,14 +49,28 @@ func TestOptionColorsNilBackground(t *testing.T) {
 	testWaveformOptionFunc(t, Colors(color.Black, nil), errColorsNilBackground)
 }
 
-// TestOptionFunctionOK verifies that Function returns no error with acceptable input.
-func TestOptionFunctionOK(t *testing.T) {
-	testWaveformOptionFunc(t, SampleFunc(RMSF64Samples), nil)
+// TestOptionColorFunctionOK verifies that ColorFunction returns no error
+// with acceptable input.
+func TestOptionColorFunctionOK(t *testing.T) {
+	testWaveformOptionFunc(t, ColorFunction(SolidColor), nil)
 }
 
-// TestOptionSampleFuncFunctionNil verifies that SampleFunc does not accept a nil SampleReduceFunc.
-func TestOptionFunctionNil(t *testing.T) {
-	testWaveformOptionFunc(t, SampleFunc(nil), errSampleFuncFunctionNil)
+// TestOptionColorFunctionNil verifies that ColorFunction does not accept
+// a nil ColorReduceFunc.
+func TestOptionColorFunctionNil(t *testing.T) {
+	testWaveformOptionFunc(t, ColorFunction(nil), errColorFunctionNil)
+}
+
+// TestOptionSampleFunctionOK verifies that SampleFunction returns no error
+// with acceptable input.
+func TestOptionSampleFunctionOK(t *testing.T) {
+	testWaveformOptionFunc(t, SampleFunction(RMSF64Samples), nil)
+}
+
+// TestOptionSampleFunctionNil verifies that SampleFunction does not accept
+// a nil SampleReduceFunc.
+func TestOptionSampleFunctionNil(t *testing.T) {
+	testWaveformOptionFunc(t, SampleFunction(nil), errSampleFunctionNil)
 }
 
 // TestOptionResolutionOK verifies that Resolution returns no error with acceptable input.
@@ -122,18 +136,33 @@ func TestWaveformSetColors(t *testing.T) {
 	}
 }
 
-// TestWaveformSetSampleFunc verifies that the Waveform.SetSampleFunc method
-// properly modifies struct members.
-func TestWaveformSetSampleFunc(t *testing.T) {
+// TestWaveformSetColorFunction verifies that the Waveform.SetColorFunction
+// method properly modifies struct members.
+func TestWaveformSetColorFunction(t *testing.T) {
 	// Generate empty Waveform, apply parameters
 	w := &Waveform{}
-	if err := w.SetSampleFunc(RMSF64Samples); err != nil {
+	if err := w.SetColorFunction(SolidColor); err != nil {
+		t.Fatal(err)
+	}
+
+	// Validate that struct members are set properly
+	if w.colorFn == nil {
+		t.Fatalf("SetColorFunction failed, nil function member")
+	}
+}
+
+// TestWaveformSetSampleFunction verifies that the Waveform.SetSampleFunction
+// method properly modifies struct members.
+func TestWaveformSetSampleFunction(t *testing.T) {
+	// Generate empty Waveform, apply parameters
+	w := &Waveform{}
+	if err := w.SetSampleFunction(RMSF64Samples); err != nil {
 		t.Fatal(err)
 	}
 
 	// Validate that struct members are set properly
 	if w.sampleFn == nil {
-		t.Fatalf("SetFunction failed, nil function member")
+		t.Fatalf("SetSampleFunction failed, nil function member")
 	}
 }
 

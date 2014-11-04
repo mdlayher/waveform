@@ -140,7 +140,7 @@ func (w *Waveform) readAndComputeSamples() ([]float64, error) {
 	// These checks are also done when applying options, but verifying them here
 	// will prevent a runtime panic if called on an empty Waveform instance.
 	if w.sampleFn == nil {
-		return nil, errSampleFuncFunctionNil
+		return nil, errSampleFunctionNil
 	}
 	if w.resolution == 0 {
 		return nil, errResolutionZero

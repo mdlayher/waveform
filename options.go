@@ -20,10 +20,17 @@ var (
 		Reason: "background color cannot be nil",
 	}
 
-	// errSampleFuncFunctionNil is returned when a nil SampleReduceFunc is used in
+	// errColorFunctionNil is returned when a nil ColorFunc is used in
+	// a call to ColorFunc.
+	errColorFunctionNil = &OptionsError{
+		Option: "colorFunction",
+		Reason: "function cannot be nil",
+	}
+
+	// errSampleFunctionNil is returned when a nil SampleReduceFunc is used in
 	// a call to SampleFunc.
-	errSampleFuncFunctionNil = &OptionsError{
-		Option: "sampleFunc",
+	errSampleFunctionNil = &OptionsError{
+		Option: "sampleFunction",
 		Reason: "function cannot be nil",
 	}
 
@@ -115,33 +122,32 @@ func (w *Waveform) setColors(fg color.Color, bg color.Color) error {
 	return nil
 }
 
-// SampleFunc generates an OptionsFunc which applies the input SampleReduceFunc
+// ColorFunction generates an OptionsFunc which applies the input ColorFunc
 // to an input Waveform struct.
 //
-// This function is used to compute values from audio samples, for use in
-// waveform generation.  The function is applied over a slice of float64
-// audio samples, reducing them to a single value.
-func SampleFunc(function SampleReduceFunc) OptionsFunc {
+// This function is used to apply a variety of color schemes to a waveform
+// image, and is called during each drawing loop of the foreground image.
+func ColorFunction(function ColorFunc) OptionsFunc {
 	return func(w *Waveform) error {
-		return w.setSampleFunc(function)
+		return w.setColorFunction(function)
 	}
 }
 
-// SetSampleFunc applies the input SampleReduceFunc to the receiving Waveform
+// SetColorFunction applies the input ColorFunc to the receiving Waveform
 // struct.
-func (w *Waveform) SetSampleFunc(function SampleReduceFunc) error {
-	return w.SetOptions(SampleFunc(function))
+func (w *Waveform) SetColorFunction(function ColorFunc) error {
+	return w.SetOptions(ColorFunction(function))
 }
 
-// setSampleFunc directly sets the SampleReduceFunc member of the receiving
+// setColorFunction directly sets the ColorFunc member of the receiving
 // Waveform struct.
-func (w *Waveform) setSampleFunc(function SampleReduceFunc) error {
+func (w *Waveform) setColorFunction(function ColorFunc) error {
 	// Function cannot be nil
 	if function == nil {
-		return errSampleFuncFunctionNil
+		return errColorFunctionNil
 	}
 
-	w.sampleFn = function
+	w.colorFn = function
 
 	return nil
 }
@@ -171,6 +177,37 @@ func (w *Waveform) setResolution(resolution uint) error {
 	}
 
 	w.resolution = resolution
+
+	return nil
+}
+
+// SampleFunc generates an OptionsFunc which applies the input SampleReduceFunc
+// to an input Waveform struct.
+//
+// This function is used to compute values from audio samples, for use in
+// waveform generation.  The function is applied over a slice of float64
+// audio samples, reducing them to a single value.
+func SampleFunction(function SampleReduceFunc) OptionsFunc {
+	return func(w *Waveform) error {
+		return w.setSampleFunction(function)
+	}
+}
+
+// SetSampleFunction applies the input SampleReduceFunc to the receiving Waveform
+// struct.
+func (w *Waveform) SetSampleFunction(function SampleReduceFunc) error {
+	return w.SetOptions(SampleFunction(function))
+}
+
+// setSampleFunction directly sets the SampleReduceFunc member of the receiving
+// Waveform struct.
+func (w *Waveform) setSampleFunction(function SampleReduceFunc) error {
+	// Function cannot be nil
+	if function == nil {
+		return errSampleFunctionNil
+	}
+
+	w.sampleFn = function
 
 	return nil
 }

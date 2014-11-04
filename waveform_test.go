@@ -115,8 +115,8 @@ func TestWaveformComputeOggVorbisErrFormat(t *testing.T) {
 // TestWaveformComputeSampleFuncFunctionNil verifies that the Waveform.Compute method returns an error
 // if a nil SampleReduceFunc member is set.
 func TestWaveformComputeSampleFuncFunctionNil(t *testing.T) {
-	if _, err := new(Waveform).Compute(); err != errSampleFuncFunctionNil {
-		t.Fatalf("unexpected Compute error: %v != %v", err, errSampleFuncFunctionNil)
+	if _, err := new(Waveform).Compute(); err != errSampleFunctionNil {
+		t.Fatalf("unexpected Compute error: %v != %v", err, errSampleFunctionNil)
 	}
 }
 
