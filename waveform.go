@@ -250,7 +250,7 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 
 	// Begin iterating all computed values
 	x := 0
-	for _, c := range computed {
+	for count, c := range computed {
 		// Scale computed value to an integer, using the height of the image and a constant
 		// scaling factor
 		scaleComputed = int(math.Floor(c * f64BoundY * imgScale))
@@ -282,11 +282,11 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 					adjust = -1 * adjust
 				}
 
-				// Retrieve and apply color function at specified X and Y coordinates, which can
-				// be customized by the user.  The output color is selected appropriately
-				// based upon the input X and Y coordinates, and is then applied to
-				// the image.
-				color := w.colorFn(x+i, y+adjust, w.fg)
+				// Retrieve and apply color function at specified computed value
+				// count, and X and Y coordinates.
+				// The output color is selected using the function, and is applied to
+				// the resulting image.
+				color := w.colorFn(count, x+i, y+adjust, w.fg)
 				img.Set(x+i, y+adjust, color)
 			}
 		}
