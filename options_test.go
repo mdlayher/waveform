@@ -34,29 +34,29 @@ func TestOptionsError(t *testing.T) {
 
 // TestOptionColorsOK verifies that Colors returns no error with acceptable input.
 func TestOptionColorsOK(t *testing.T) {
-	testWaveformOptionFunc(t, Colors(color.Black, color.Black, color.Black), nil)
+	testWaveformOptionFunc(t, Colors(color.Black, color.Black), nil)
 }
 
 // TestOptionColorsNilForeground verifies that Colors does not accept a nil
 // foreground color.
 func TestOptionColorsNilForeground(t *testing.T) {
-	testWaveformOptionFunc(t, Colors(nil, color.Black, color.Black), errColorsNilForeground)
+	testWaveformOptionFunc(t, Colors(nil, color.Black), errColorsNilForeground)
 }
 
 // TestOptionColorsNilBackground verifies that Colors does not accept a nil
 // backround color.
 func TestOptionColorsNilBackground(t *testing.T) {
-	testWaveformOptionFunc(t, Colors(color.Black, nil, color.Black), errColorsNilBackground)
+	testWaveformOptionFunc(t, Colors(color.Black, nil), errColorsNilBackground)
 }
 
 // TestOptionFunctionOK verifies that Function returns no error with acceptable input.
 func TestOptionFunctionOK(t *testing.T) {
-	testWaveformOptionFunc(t, Function(RMSF64Samples), nil)
+	testWaveformOptionFunc(t, SampleFunc(RMSF64Samples), nil)
 }
 
-// TestOptionFunctionNil verifies that Function does not accept a nil SampleReduceFunc.
+// TestOptionSampleFuncFunctionNil verifies that SampleFunc does not accept a nil SampleReduceFunc.
 func TestOptionFunctionNil(t *testing.T) {
-	testWaveformOptionFunc(t, Function(nil), errFunctionNil)
+	testWaveformOptionFunc(t, SampleFunc(nil), errSampleFuncFunctionNil)
 }
 
 // TestOptionResolutionOK verifies that Resolution returns no error with acceptable input.
@@ -106,11 +106,10 @@ func TestWaveformSetColors(t *testing.T) {
 	// Predefined test values
 	fg := color.Black
 	bg := color.White
-	alt := color.White
 
 	// Generate empty Waveform, apply parameters
 	w := &Waveform{}
-	if err := w.SetColors(fg, bg, alt); err != nil {
+	if err := w.SetColors(fg, bg); err != nil {
 		t.Fatal(err)
 	}
 
@@ -121,22 +120,19 @@ func TestWaveformSetColors(t *testing.T) {
 	if w.bg != bg {
 		t.Fatalf("unexpected background color: %v != %v", w.bg, bg)
 	}
-	if w.alt != alt {
-		t.Fatalf("unexpected alternate color: %v != %v", w.alt, alt)
-	}
 }
 
-// TestWaveformSetFunction verifies that the Waveform.SetFunction method properly
-// modifies struct members.
-func TestWaveformSetFunction(t *testing.T) {
+// TestWaveformSetSampleFunc verifies that the Waveform.SetSampleFunc method
+// properly modifies struct members.
+func TestWaveformSetSampleFunc(t *testing.T) {
 	// Generate empty Waveform, apply parameters
 	w := &Waveform{}
-	if err := w.SetFunction(RMSF64Samples); err != nil {
+	if err := w.SetSampleFunc(RMSF64Samples); err != nil {
 		t.Fatal(err)
 	}
 
 	// Validate that struct members are set properly
-	if w.function == nil {
+	if w.sampleFn == nil {
 		t.Fatalf("SetFunction failed, nil function member")
 	}
 }

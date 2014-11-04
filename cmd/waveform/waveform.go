@@ -26,9 +26,6 @@ var (
 	// strFGColor is the hex color value used to color the foreground of the waveform image
 	strFGColor = flag.String("fg", "#000000", "hex foreground color of output waveform image")
 
-	// strAltColor is the hex color value used to set the alternate color of the waveform image
-	strAltColor = flag.String("alt", "", "hex alternate color of output waveform image")
-
 	// resolution is the number of times audio is read and the waveform is drawn,
 	// per second of audio
 	resolution = flag.Uint("resolution", 1, "number of times audio is read and drawn per second of audio")
@@ -63,18 +60,10 @@ func main() {
 	colorR, colorG, colorB = hexToRGB(*strFGColor)
 	fgColor := color.RGBA{colorR, colorG, colorB, 255}
 
-	// Create image alternate color from input hex color string, or default
-	// to foreground color if empty
-	altColor := fgColor
-	if *strAltColor != "" {
-		colorR, colorG, colorB = hexToRGB(*strAltColor)
-		altColor = color.RGBA{colorR, colorG, colorB, 255}
-	}
-
 	// Generate a waveform image from stdin, using values passed from
 	// flags as options
 	img, err := waveform.Generate(os.Stdin,
-		waveform.Colors(fgColor, bgColor, altColor),
+		waveform.Colors(fgColor, bgColor),
 		waveform.Resolution(*resolution),
 		waveform.Scale(*scaleX, *scaleY),
 		waveform.ScaleClipping(),

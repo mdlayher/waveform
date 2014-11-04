@@ -46,11 +46,12 @@ type Waveform struct {
 	r io.Reader
 
 	resolution uint
-	function   SampleReduceFunc
+	sampleFn   SampleReduceFunc
 
-	fg  color.Color
-	bg  color.Color
-	alt color.Color
+	fg color.Color
+	bg color.Color
+
+	colorFn ColorFunc
 
 	scaleX uint
 	scaleY uint
@@ -89,13 +90,14 @@ func New(r io.Reader, options ...OptionsFunc) (*Waveform, error) {
 		resolution: 1,
 
 		// Use RMSF64Samples as a SampleReduceFunc
-		function: RMSF64Samples,
+		sampleFn: RMSF64Samples,
 
 		// Black waveform on white background
-		// No alternate color
-		bg:  color.White,
-		fg:  color.Black,
-		alt: nil,
+		bg: color.White,
+		fg: color.Black,
+
+		// Generate solid color waveform with ColorFunc
+		colorFn: SolidColor,
 
 		// No scaling
 		scaleX: 1,
@@ -137,8 +139,8 @@ func (w *Waveform) readAndComputeSamples() ([]float64, error) {
 	// Validate struct members
 	// These checks are also done when applying options, but verifying them here
 	// will prevent a runtime panic if called on an empty Waveform instance.
-	if w.function == nil {
-		return nil, errFunctionNil
+	if w.sampleFn == nil {
+		return nil, errSampleFuncFunctionNil
 	}
 	if w.resolution == 0 {
 		return nil, errResolutionZero
@@ -185,7 +187,7 @@ func (w *Waveform) readAndComputeSamples() ([]float64, error) {
 		}
 
 		// Apply SampleReduceFunc over float64 audio samples
-		value = w.function(samples)
+		value = w.sampleFn(samples)
 
 		// Store computed value
 		computed = append(computed, value)
@@ -248,7 +250,7 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 
 	// Begin iterating all computed values
 	x := 0
-	for count, c := range computed {
+	for _, c := range computed {
 		// Scale computed value to an integer, using the height of the image and a constant
 		// scaling factor
 		scaleComputed = int(math.Floor(c * f64BoundY * imgScale))
@@ -280,15 +282,12 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 					adjust = -1 * adjust
 				}
 
-				// On odd iterations (or if no alternate set), draw using specified
-				// foreground color at specified X and Y coordinate
-				if count%2 != 0 || w.alt == nil {
-					img.Set(x+i, y+adjust, w.fg)
-				} else {
-					// On even iterations, draw using specified alternate color at
-					// specified X and Y coordinate
-					img.Set(x+i, y+adjust, w.alt)
-				}
+				// Retrieve and apply color function at specified X and Y coordinates, which can
+				// be customized by the user.  The output color is selected appropriately
+				// based upon the input X and Y coordinates, and is then applied to
+				// the image.
+				color := w.colorFn(x+i, y+adjust, w.fg)
+				img.Set(x+i, y+adjust, color)
 			}
 		}
 

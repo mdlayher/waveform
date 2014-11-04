@@ -20,10 +20,10 @@ var (
 		Reason: "background color cannot be nil",
 	}
 
-	// errFunctionNil is returned when a nil SampleReduceFunc is used in
-	// a call to Function.
-	errFunctionNil = &OptionsError{
-		Option: "function",
+	// errSampleFuncFunctionNil is returned when a nil SampleReduceFunc is used in
+	// a call to SampleFunc.
+	errSampleFuncFunctionNil = &OptionsError{
+		Option: "sampleFunc",
 		Reason: "function cannot be nil",
 	}
 
@@ -82,27 +82,23 @@ func (w *Waveform) SetOptions(options ...OptionsFunc) error {
 	return nil
 }
 
-// Colors generates an OptionsFunc which applies the input foreground,
-// background, and alternate colors to an input Waveform struct.
-//
-// If an alternate color is specified, it will be alternated with the
-// foreground color to create a stripe effect in the image.
-// If alternate color is set to nil, no alternate color will be used.
-func Colors(fg color.Color, bg color.Color, alt color.Color) OptionsFunc {
+// Colors generates an OptionsFunc which applies the input foreground
+// and background colors to an input Waveform struct.
+func Colors(fg color.Color, bg color.Color) OptionsFunc {
 	return func(w *Waveform) error {
-		return w.setColors(fg, bg, alt)
+		return w.setColors(fg, bg)
 	}
 }
 
-// SetColors applies the input foreground, background, and alternate colors
+// SetColors applies the input foreground and background color
 // to the receiving Waveform struct.
-func (w *Waveform) SetColors(fg color.Color, bg color.Color, alt color.Color) error {
-	return w.SetOptions(Colors(fg, bg, alt))
+func (w *Waveform) SetColors(fg color.Color, bg color.Color) error {
+	return w.SetOptions(Colors(fg, bg))
 }
 
-// setColors directly modifies the foreground, background, and alternate color
+// setColors directly modifies the foreground and background color
 // members of the receiving struct.
-func (w *Waveform) setColors(fg color.Color, bg color.Color, alt color.Color) error {
+func (w *Waveform) setColors(fg color.Color, bg color.Color) error {
 	// Foreground color cannot be nil
 	if fg == nil {
 		return errColorsNilForeground
@@ -115,37 +111,37 @@ func (w *Waveform) setColors(fg color.Color, bg color.Color, alt color.Color) er
 
 	w.fg = fg
 	w.bg = bg
-	w.alt = alt
 
 	return nil
 }
 
-// Function generates an OptionsFunc which applies the input function
-// value to an input Waveform struct.
+// SampleFunc generates an OptionsFunc which applies the input SampleReduceFunc
+// to an input Waveform struct.
 //
 // This function is used to compute values from audio samples, for use in
 // waveform generation.  The function is applied over a slice of float64
 // audio samples, reducing them to a single value.
-func Function(function SampleReduceFunc) OptionsFunc {
+func SampleFunc(function SampleReduceFunc) OptionsFunc {
 	return func(w *Waveform) error {
-		return w.setFunction(function)
+		return w.setSampleFunc(function)
 	}
 }
 
-// SetFunction applies the input function to the receiving Waveform struct.
-func (w *Waveform) SetFunction(function SampleReduceFunc) error {
-	return w.SetOptions(Function(function))
+// SetSampleFunc applies the input SampleReduceFunc to the receiving Waveform
+// struct.
+func (w *Waveform) SetSampleFunc(function SampleReduceFunc) error {
+	return w.SetOptions(SampleFunc(function))
 }
 
-// setFunction directly sets the function member of the receiving Waveform
-// struct.
-func (w *Waveform) setFunction(function SampleReduceFunc) error {
+// setSampleFunc directly sets the SampleReduceFunc member of the receiving
+// Waveform struct.
+func (w *Waveform) setSampleFunc(function SampleReduceFunc) error {
 	// Function cannot be nil
 	if function == nil {
-		return errFunctionNil
+		return errSampleFuncFunctionNil
 	}
 
-	w.function = function
+	w.sampleFn = function
 
 	return nil
 }

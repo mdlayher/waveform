@@ -112,11 +112,11 @@ func TestWaveformComputeOggVorbisErrFormat(t *testing.T) {
 	testWaveformCompute(t, bytes.NewReader(oggVorbisFile), ErrFormat, nil, nil)
 }
 
-// TestWaveformComputeFunctionNil verifies that the Waveform.Compute method returns an error
-// if a nil function member is set.
-func TestWaveformComputeFunctionNil(t *testing.T) {
-	if _, err := new(Waveform).Compute(); err != errFunctionNil {
-		t.Fatalf("unexpected Compute error: %v != %v", err, errFunctionNil)
+// TestWaveformComputeSampleFuncFunctionNil verifies that the Waveform.Compute method returns an error
+// if a nil SampleReduceFunc member is set.
+func TestWaveformComputeSampleFuncFunctionNil(t *testing.T) {
+	if _, err := new(Waveform).Compute(); err != errSampleFuncFunctionNil {
+		t.Fatalf("unexpected Compute error: %v != %v", err, errSampleFuncFunctionNil)
 	}
 }
 
@@ -124,7 +124,7 @@ func TestWaveformComputeFunctionNil(t *testing.T) {
 // if the resolution member is 0.
 func TestWaveformComputeResolutionZero(t *testing.T) {
 	w := &Waveform{
-		function: RMSF64Samples,
+		sampleFn: RMSF64Samples,
 	}
 	if _, err := w.Compute(); err != errResolutionZero {
 		t.Fatalf("unexpected Compute error: %v != %v", err, errResolutionZero)
