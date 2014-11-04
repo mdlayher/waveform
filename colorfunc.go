@@ -2,6 +2,8 @@ package waveform
 
 import (
 	"image/color"
+	"math/rand"
+	"time"
 )
 
 // ColorFunc is a function which accepts a computed value count, X and Y
@@ -19,18 +21,49 @@ func SolidColor(count int, x int, y int, color color.Color) color.Color {
 	return color
 }
 
-// AlternateColor generates a ColorFunc which applies an alternate color
-// on alternating X-axis values.  This can be used to create a stripe effect
-// in the resulting waveform image.
-func AlternateColor(alt color.Color) ColorFunc {
-	return func(count int, x int, y int, color color.Color) color.Color {
-		// On odd iterations (or if no alternate set), draw using specified
-		// foreground color at specified X and Y coordinate
-		if count%2 != 0 || alt == nil {
-			return color
-		} else {
-			// On even iterations, draw using specified alternate color
-			return alt
+// FuzzColor generates a ColorFunc which applies a random color on each call,
+// selected from an input, variadic slice of colors.  This can be used to create
+// a random fuzz or "static" effect in the resulting waveform image.
+func FuzzColor(colors ...color.Color) ColorFunc {
+	// Filter any nil values
+	colors = filterNilColors(colors)
+
+	// Seed RNG
+	rand.Seed(time.Now().UnixNano())
+
+	// Select a color at random on each call
+	return func(count int, x int, y int, inColor color.Color) color.Color {
+		return colors[rand.Intn(len(colors))]
+	}
+}
+
+// StripeColor generates a ColorFunc which applies one color from the input,
+// variadic slice at each computed value.  Each color is used in order, and
+// the rotation will repeat until the image is complete. This creates a stripe
+// effect in the resulting waveform image.
+func StripeColor(colors ...color.Color) ColorFunc {
+	// Filter any nil values
+	colors = filterNilColors(colors)
+
+	var lastCount int
+	return func(count int, x int, y int, inColor color.Color) color.Color {
+		// For each new count value, use the next color in the slice
+		if count > lastCount {
+			lastCount = count
+		}
+
+		return colors[lastCount%len(colors)]
+	}
+}
+
+// filterNilColors strips any nil color.Color values from the input slice.
+func filterNilColors(colors []color.Color) []color.Color {
+	var cleanColors []color.Color
+	for _, c := range colors {
+		if c != nil {
+			cleanColors = append(cleanColors, c)
 		}
 	}
+
+	return cleanColors
 }
