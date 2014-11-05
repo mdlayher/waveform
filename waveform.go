@@ -204,12 +204,16 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 	intScaleX := int(w.scaleX)
 	intScaleY := int(w.scaleY)
 
-	// Set image resolution
-	imgX := len(computed) * intScaleX
-	imgY := imgYDefault * intScaleY
+	// Calculate maximum n, x, y, where:
+	//  - n: number of computed values
+	//  - x: number of pixels on X-axis
+	//  - y: number of pixels on Y-axis
+	maxN := len(computed)
+	maxX := maxN * intScaleX
+	maxY := imgYDefault * intScaleY
 
 	// Create output, rectangular image
-	img := image.NewRGBA(image.Rect(0, 0, imgX, imgY))
+	img := image.NewRGBA(image.Rect(0, 0, maxX, maxY))
 	bounds := img.Bounds()
 
 	// Calculate halfway point of Y-axis for image
@@ -246,7 +250,7 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 
 	// Begin iterating all computed values
 	x := 0
-	for count, c := range computed {
+	for n, c := range computed {
 		// Scale computed value to an integer, using the height of the image and a constant
 		// scaling factor
 		scaleComputed = int(math.Floor(c * f64BoundY * imgScale))
@@ -258,7 +262,7 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 		for y := 0; y < intBoundY; y++ {
 			// If X-axis is being scaled, draw background over several X coordinates
 			for i := 0; i < intScaleX; i++ {
-				img.Set(x+i, y, w.bgColorFn(count, x+i, y))
+				img.Set(x+i, y, w.bgColorFn(n, x+i, y, maxN, maxX, maxY))
 			}
 		}
 
@@ -290,7 +294,7 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 				// count, and X and Y coordinates.
 				// The output color is selected using the function, and is applied to
 				// the resulting image.
-				img.Set(x+i, y+adjust, w.fgColorFn(count, x+i, y+adjust))
+				img.Set(x+i, y+adjust, w.fgColorFn(n, x+i, y+adjust, maxN, maxX, maxY))
 			}
 		}
 
