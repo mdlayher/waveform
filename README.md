@@ -48,3 +48,11 @@ cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF3300 -bg=#0099CC -alt=
 ```
 
 ![waveform_fuzz](https://cloud.githubusercontent.com/assets/1926905/4910076/c6aa0e70-647a-11e4-8385-754960c9f074.png)
+
+Apply a new set of colors, draw using a gradient pattern.
+
+```
+cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF0000 -bg=#00FF00 -alt=#0000FF -fn gradient -x 5 -y 2 > ~/waveform_gradient.png
+```
+
+![waveform_gradient](https://cloud.githubusercontent.com/assets/1926905/4911891/1d326868-6495-11e4-9f76-b04ad057ea5e.png)
