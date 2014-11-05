@@ -16,7 +16,7 @@ Usage of waveform:
   -alt="": hex alternate color of output waveform image
   -bg="#FFFFFF": hex background color of output waveform image
   -fg="#000000": hex foreground color of output waveform image
-  -fn="solid": function used to color output waveform image [options: fuzz, solid, stripe]
+  -fn="solid": function used to color output waveform image [options: fuzz, gradient, solid, stripe]
   -resolution=1: number of times audio is read and drawn per second of audio
   -sharpness=1: sharpening factor used to add curvature to a scaled image
   -x=1: scaling factor for image X-axis
