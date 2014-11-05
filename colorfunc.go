@@ -37,6 +37,9 @@ func FuzzColor(colors ...color.Color) ColorFunc {
 // RGBA input colors.  The gradient attempts to gradually reduce the distance between
 // two colors, creating a sweeping color change effect in the resulting waveform
 // image.
+//
+// BUG(mdlayher): GradientColor does not always produce very effective gradients.
+// It depends on how close input values are, and will require more investigation.
 func GradientColor(start color.RGBA, end color.RGBA) ColorFunc {
 	// Current value starts at the first value, and gradually ascends or descends
 	// to the second.
