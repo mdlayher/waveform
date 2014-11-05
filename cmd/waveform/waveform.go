@@ -99,7 +99,7 @@ func main() {
 	// Generate a waveform image from stdin, using values passed from
 	// flags as options
 	img, err := waveform.Generate(os.Stdin,
-		waveform.Colors(fgColor, bgColor),
+		waveform.BGColorFunction(waveform.SolidColor(bgColor)),
 		waveform.FGColorFunction(colorFn),
 		waveform.Resolution(*resolution),
 		waveform.Scale(*scaleX, *scaleY),

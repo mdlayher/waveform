@@ -1,23 +1,13 @@
 package waveform
 
-import (
-	"fmt"
-	"image/color"
-)
+import "fmt"
 
 var (
-	// errColorsNilForeground is returned when a nil foreground color is
-	// used in a call to Colors.
-	errColorsNilForeground = &OptionsError{
-		Option: "colors",
-		Reason: "foreground color cannot be nil",
-	}
-
-	// errColorsNilBackground is returned when a nil background color is
-	// used in a call to Colors.
-	errColorsNilBackground = &OptionsError{
-		Option: "colors",
-		Reason: "background color cannot be nil",
+	// errBGColorFunctionNil is returned when a nil ColorFunc is used in
+	// a call to BGColorFunction.
+	errBGColorFunctionNil = &OptionsError{
+		Option: "bgColorFunction",
+		Reason: "function cannot be nil",
 	}
 
 	// errFGColorFunctionNil is returned when a nil ColorFunc is used in
@@ -89,35 +79,33 @@ func (w *Waveform) SetOptions(options ...OptionsFunc) error {
 	return nil
 }
 
-// Colors generates an OptionsFunc which applies the input foreground
-// and background colors to an input Waveform struct.
-func Colors(fg color.Color, bg color.Color) OptionsFunc {
+// BGColorFunction generates an OptionsFunc which applies the input background
+// ColorFunc to an input Waveform struct.
+//
+// This function is used to apply a variety of color schemes to the background
+// of a waveform image, and is called during each drawing loop of the background
+// image.
+func BGColorFunction(function ColorFunc) OptionsFunc {
 	return func(w *Waveform) error {
-		return w.setColors(fg, bg)
+		return w.setBGColorFunction(function)
 	}
 }
 
-// SetColors applies the input foreground and background color
-// to the receiving Waveform struct.
-func (w *Waveform) SetColors(fg color.Color, bg color.Color) error {
-	return w.SetOptions(Colors(fg, bg))
+// SetBGColorFunction applies the input ColorFunc to the receiving Waveform
+// struct for background use.
+func (w *Waveform) SetBGColorFunction(function ColorFunc) error {
+	return w.SetOptions(BGColorFunction(function))
 }
 
-// setColors directly modifies the foreground and background color
-// members of the receiving struct.
-func (w *Waveform) setColors(fg color.Color, bg color.Color) error {
-	// Foreground color cannot be nil
-	if fg == nil {
-		return errColorsNilForeground
+// setBGColorFunction directly sets the background ColorFunc member of the
+// receiving Waveform struct.
+func (w *Waveform) setBGColorFunction(function ColorFunc) error {
+	// Function cannot be nil
+	if function == nil {
+		return errBGColorFunctionNil
 	}
 
-	// Background color cannot be nil
-	if bg == nil {
-		return errColorsNilBackground
-	}
-
-	w.fg = fg
-	w.bg = bg
+	w.bgColorFn = function
 
 	return nil
 }

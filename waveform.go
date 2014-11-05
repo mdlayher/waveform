@@ -4,7 +4,6 @@ package waveform
 import (
 	"image"
 	"image/color"
-	"image/draw"
 	"io"
 	"math"
 
@@ -48,9 +47,7 @@ type Waveform struct {
 	resolution uint
 	sampleFn   SampleReduceFunc
 
-	fg color.Color
-	bg color.Color
-
+	bgColorFn ColorFunc
 	fgColorFn ColorFunc
 
 	scaleX uint
@@ -92,11 +89,9 @@ func New(r io.Reader, options ...OptionsFunc) (*Waveform, error) {
 		// Use RMSF64Samples as a SampleReduceFunc
 		sampleFn: RMSF64Samples,
 
-		// Black waveform on white background
-		bg: color.White,
-		fg: color.Black,
-
-		// Generate solid foreground color waveform with ColorFunc
+		// Generate solid, black background color with solid, white
+		// foreground color waveform using ColorFunc
+		bgColorFn: SolidColor(color.White),
 		fgColorFn: SolidColor(color.Black),
 
 		// No scaling
@@ -213,12 +208,12 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 	imgX := len(computed) * intScaleX
 	imgY := imgYDefault * intScaleY
 
-	// Create output image, fill image with specified background color
+	// Create output, rectangular image
 	img := image.NewRGBA(image.Rect(0, 0, imgX, imgY))
-	draw.Draw(img, img.Bounds(), image.NewUniform(w.bg), image.ZP, draw.Src)
+	bounds := img.Bounds()
 
 	// Calculate halfway point of Y-axis for image
-	imgHalfY := img.Bounds().Max.Y / 2
+	imgHalfY := bounds.Max.Y / 2
 
 	// Calculate a peak value used for smoothing scaled X-axis images
 	peak := int(math.Ceil(float64(w.scaleX)) / 2)
@@ -245,7 +240,8 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 
 	// Values to be used for repeated computations
 	var scaleComputed, halfScaleComputed, adjust int
-	f64BoundY := float64(img.Bounds().Max.Y)
+	intBoundY := int(bounds.Max.Y)
+	f64BoundY := float64(bounds.Max.Y)
 	intSharpness := int(w.sharpness)
 
 	// Begin iterating all computed values
@@ -257,6 +253,14 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 
 		// Calculate the halfway point for the scaled computed value
 		halfScaleComputed = scaleComputed / 2
+
+		// Draw background color down the entire Y-axis
+		for y := 0; y < intBoundY; y++ {
+			// If X-axis is being scaled, draw background over several X coordinates
+			for i := 0; i < intScaleX; i++ {
+				img.Set(x+i, y, w.bgColorFn(count, x+i, y))
+			}
+		}
 
 		// Iterate image coordinates on the Y-axis, generating a symmetrical waveform
 		// image above and below the center of the image
