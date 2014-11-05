@@ -250,10 +250,10 @@ func (w *Waveform) generateImage(computed []float64) image.Image {
 
 	// Begin iterating all computed values
 	x := 0
-	for n, c := range computed {
+	for n := range computed {
 		// Scale computed value to an integer, using the height of the image and a constant
 		// scaling factor
-		scaleComputed = int(math.Floor(c * f64BoundY * imgScale))
+		scaleComputed = int(math.Floor(computed[n] * f64BoundY * imgScale))
 
 		// Calculate the halfway point for the scaled computed value
 		halfScaleComputed = scaleComputed / 2
