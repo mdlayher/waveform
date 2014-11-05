@@ -28,15 +28,15 @@ const (
 var (
 	// ErrFormat is returned when the input audio format is not a registered format
 	// with the audio package.
-	ErrFormat = struct{ error }{audio.ErrFormat}
+	ErrFormat = audio.ErrFormat
 
 	// ErrInvalidData is returned when the input audio format is recognized, but
 	// the stream is invalid or corrupt in some way.
-	ErrInvalidData = struct{ error }{audio.ErrInvalidData}
+	ErrInvalidData = audio.ErrInvalidData
 
 	// ErrUnexpectedEOS is returned when end-of-stream is encountered in the middle
 	// of a fixed-size block or data structure.
-	ErrUnexpectedEOS = struct{ error }{audio.ErrUnexpectedEOS}
+	ErrUnexpectedEOS = audio.ErrUnexpectedEOS
 )
 
 // Waveform is a struct which can be manipulated and used to generate
