@@ -85,10 +85,10 @@ func GradientColor(start color.RGBA, end color.RGBA) ColorFunc {
 		current.R = stepValue(start.R > end.R, maxN, distR, current.R, lastR)
 		lastR = current.R
 
-		current.G = stepValue(start.R > end.R, maxN, distG, current.G, lastG)
+		current.G = stepValue(start.G > end.G, maxN, distG, current.G, lastG)
 		lastG = current.G
 
-		current.B = stepValue(start.R > end.R, maxN, distB, current.B, lastB)
+		current.B = stepValue(start.B > end.B, maxN, distB, current.B, lastB)
 		lastB = current.B
 
 		return current
