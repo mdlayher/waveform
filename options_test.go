@@ -32,32 +32,27 @@ func TestOptionsError(t *testing.T) {
 	}
 }
 
-// TestOptionColorsOK verifies that Colors returns no error with acceptable input.
-func TestOptionColorsOK(t *testing.T) {
-	testWaveformOptionFunc(t, Colors(color.Black, color.Black), nil)
-}
-
-// TestOptionColorsNilForeground verifies that Colors does not accept a nil
-// foreground color.
-func TestOptionColorsNilForeground(t *testing.T) {
-	testWaveformOptionFunc(t, Colors(nil, color.Black), errColorsNilForeground)
-}
-
-// TestOptionColorsNilBackground verifies that Colors does not accept a nil
-// backround color.
-func TestOptionColorsNilBackground(t *testing.T) {
-	testWaveformOptionFunc(t, Colors(color.Black, nil), errColorsNilBackground)
-}
-
-// TestOptionColorFunctionOK verifies that ColorFunction returns no error
+// TestOptionBGColorFunctionOK verifies that BGColorFunction returns no error
 // with acceptable input.
-func TestOptionColorFunctionOK(t *testing.T) {
+func TestOptionBGColorFunctionOK(t *testing.T) {
+	testWaveformOptionFunc(t, BGColorFunction(SolidColor(color.Black)), nil)
+}
+
+// TestOptionBGColorFunctionNil verifies that BGColorFunction does not accept
+// a nil ColorReduceFunc.
+func TestOptionBGColorFunctionNil(t *testing.T) {
+	testWaveformOptionFunc(t, BGColorFunction(nil), errBGColorFunctionNil)
+}
+
+// TestOptionFGColorFunctionOK verifies that FGColorFunction returns no error
+// with acceptable input.
+func TestOptionFGColorFunctionOK(t *testing.T) {
 	testWaveformOptionFunc(t, FGColorFunction(SolidColor(color.Black)), nil)
 }
 
-// TestOptionColorFunctionNil verifies that ColorFunction does not accept
+// TestOptionFGColorFunctionNil verifies that FGColorFunction does not accept
 // a nil ColorReduceFunc.
-func TestOptionColorFunctionNil(t *testing.T) {
+func TestOptionFGColorFunctionNil(t *testing.T) {
 	testWaveformOptionFunc(t, FGColorFunction(nil), errFGColorFunctionNil)
 }
 
@@ -114,25 +109,18 @@ func TestWaveformSetOptionsNil(t *testing.T) {
 	testWaveformOptionFunc(t, nil, nil)
 }
 
-// TestWaveformSetColors verifies that the Waveform.SetColors method properly
-// modifies struct members.
-func TestWaveformSetColors(t *testing.T) {
-	// Predefined test values
-	fg := color.Black
-	bg := color.White
-
+// TestWaveformSetBGColorFunction verifies that the Waveform.SetBGColorFunction
+// method properly modifies struct members.
+func TestWaveformSetBGColorFunction(t *testing.T) {
 	// Generate empty Waveform, apply parameters
 	w := &Waveform{}
-	if err := w.SetColors(fg, bg); err != nil {
+	if err := w.SetBGColorFunction(SolidColor(color.Black)); err != nil {
 		t.Fatal(err)
 	}
 
 	// Validate that struct members are set properly
-	if w.fg != fg {
-		t.Fatalf("unexpected foreground color: %v != %v", w.fg, fg)
-	}
-	if w.bg != bg {
-		t.Fatalf("unexpected background color: %v != %v", w.bg, bg)
+	if w.bgColorFn == nil {
+		t.Fatalf("SetBGColorFunction failed, nil function member")
 	}
 }
 
