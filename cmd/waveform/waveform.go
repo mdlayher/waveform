@@ -20,9 +20,10 @@ const (
 	app = "waveform"
 
 	// Names of available color functions
-	fnFuzz   = "fuzz"
-	fnSolid  = "solid"
-	fnStripe = "stripe"
+	fnFuzz     = "fuzz"
+	fnGradient = "gradient"
+	fnSolid    = "solid"
+	fnStripe   = "stripe"
 )
 
 var (
@@ -54,7 +55,7 @@ var (
 )
 
 // fnOptions is the help string which lists available options
-var fnOptions = fmt.Sprintf("[options: %s, %s, %s]", fnFuzz, fnSolid, fnStripe)
+var fnOptions = fmt.Sprintf("[options: %s, %s, %s, %s]", fnFuzz, fnGradient, fnSolid, fnStripe)
 
 func main() {
 	// Parse flags
@@ -85,9 +86,10 @@ func main() {
 
 	// Set of available functions
 	fnSet := map[string]waveform.ColorFunc{
-		fnFuzz:   waveform.FuzzColor(fgColor, altColor),
-		fnSolid:  waveform.SolidColor(fgColor),
-		fnStripe: waveform.StripeColor(fgColor, altColor),
+		fnFuzz:     waveform.FuzzColor(fgColor, altColor),
+		fnGradient: waveform.GradientColor(fgColor, altColor),
+		fnSolid:    waveform.SolidColor(fgColor),
+		fnStripe:   waveform.StripeColor(fgColor, altColor),
 	}
 
 	// Validate user-selected function
