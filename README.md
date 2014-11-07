@@ -56,3 +56,11 @@ cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF0000 -bg=#00FF00 -alt=
 ```
 
 ![waveform_gradient](https://cloud.githubusercontent.com/assets/1926905/4911891/1d326868-6495-11e4-9f76-b04ad057ea5e.png)
+
+Apply a checkerboard color set, draw using a checkerboard pattern.
+
+```
+cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#000000 -bg=#222222 -alt=#FFFFFF -fn checker -x 5 -y 2 > ~/waveform_checker.png
+```
+
+![waveform_checker](https://cloud.githubusercontent.com/assets/1926905/4961769/e3280c96-66d2-11e4-8e3c-d0b843230589.png)

@@ -17,6 +17,19 @@ import (
 // for n, x, and y; possibly taking into account their maximum values.
 type ColorFunc func(n int, x int, y int, maxN int, maxX int, maxY int) color.Color
 
+// CheckerColor generates a ColorFunc which produces a checkerboard pattern,
+// using the two input colors.  Each square is drawn to the size specified by
+// the size parameter.
+func CheckerColor(colorA color.Color, colorB color.Color, size uint) ColorFunc {
+	return func(n int, x int, y int, maxN int, maxX int, maxY int) color.Color {
+		if ((uint(x)/size)+(uint(y)/size))%2 == 0 {
+			return colorA
+		}
+
+		return colorB
+	}
+}
+
 // FuzzColor generates a ColorFunc which applies a random color on each call,
 // selected from an input, variadic slice of colors.  This can be used to create
 // a random fuzz or "static" effect in the resulting waveform image.
