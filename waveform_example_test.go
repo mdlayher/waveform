@@ -3,6 +3,7 @@ package waveform
 import (
 	"bytes"
 	"fmt"
+	"image/color"
 	"image/png"
 	"os"
 )
@@ -20,8 +21,20 @@ func ExampleGenerate() {
 	fmt.Println("open:", file.Name())
 	defer file.Close()
 
-	// Directly generate waveform image from audio file
-	img, err := Generate(file)
+	// Directly generate waveform image from audio file, applying any number
+	// of options functions along the way
+	img, err := Generate(file,
+		// Solid white background
+		BGColorFunction(SolidColor(color.White)),
+		// Striped red, green, and blue foreground
+		FGColorFunction(StripeColor(
+			color.RGBA{255, 0, 0, 255},
+			color.RGBA{0, 255, 0, 255},
+			color.RGBA{0, 0, 255, 255},
+		)),
+		// Scaled 10x horizontally, 2x vertically
+		Scale(10, 2),
+	)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -33,9 +46,10 @@ func ExampleGenerate() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Printf("encoded: %d bytes", buf.Len())
+	fmt.Printf("encoded: %d bytes\nresolution: %s", buf.Len(), img.Bounds().Max)
 
 	// Output:
 	// open: ./test/tone16bit.flac
-	// encoded: 88 bytes
+	// encoded: 344 bytes
+	// resolution: (50,256)
 }
