@@ -55,7 +55,7 @@ Apply a new set of colors, draw using a gradient pattern.
 cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF0000 -bg=#00FF00 -alt=#0000FF -fn gradient -x 5 -y 2 > ~/waveform_gradient.png
 ```
 
-![waveform_gradient](https://cloud.githubusercontent.com/assets/1926905/4911891/1d326868-6495-11e4-9f76-b04ad057ea5e.png)
+![waveform_gradient](https://cloud.githubusercontent.com/assets/1926905/5416955/c5592f10-8202-11e4-943d-d86214b26b18.png)
 
 Apply a checkerboard color set, draw using a checkerboard pattern.
 
