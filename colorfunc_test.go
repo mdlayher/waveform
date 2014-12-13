@@ -38,6 +38,18 @@ func TestFuzzColorMultipleColors(t *testing.T) {
 	testFuzzColor(t, []color.Color{black, white, red, green, blue})
 }
 
+// TestGradientColorOneColor verifies that GradientColor produces only the single
+// color used in its input.
+func TestGradientColorOneColor(t *testing.T) {
+	testGradientColor(t, black, black)
+}
+
+// TestGradientColorTwoColors verifies that GradientColor produces a correct
+// gradient between two colors.
+func TestGradientColorTwoColors(t *testing.T) {
+	testGradientColor(t, black, white)
+}
+
 // TestSolidColor verifies that SolidColor always returns the same input
 // color, for all input values.
 func TestSolidColor(t *testing.T) {
@@ -115,6 +127,35 @@ func testFuzzColor(t *testing.T, in []color.Color) {
 	for i := 0; i < 10000; i++ {
 		if out, ok := set[fn(i, i, i, i, i, i).(color.RGBA)]; !ok {
 			t.Fatalf("color not in set: %v", out)
+		}
+	}
+}
+
+// testGradientColor is a test helper which aids in testing the GradientColor
+// function.
+func testGradientColor(t *testing.T, start color.RGBA, end color.RGBA) {
+	const maxN = 100
+
+	// Generate function with defined values
+	fn := GradientColor(start, end)
+
+	// Check edges
+	for i, n := range []int{0, maxN} {
+		// Get color at point, get RGBA equivalent
+		c := fn(n, 0, 0, maxN, 0, 0)
+		r, g, b, _ := c.RGBA()
+
+		// First iteration, use start; second, use end
+		var testColor color.RGBA
+		if i == 0 {
+			testColor = start
+		} else {
+			testColor = end
+		}
+
+		// Compare values to ensure correctness
+		if testColor.R != uint8(r) || testColor.G != uint8(g) || testColor.B != uint8(b) {
+			t.Fatalf("unexpected color at %d%%: %v != %v", n, c, testColor)
 		}
 	}
 }
