@@ -14,6 +14,30 @@ var (
 	blue  = color.RGBA{0, 0, 255, 255}
 )
 
+// TestCheckerColorOneColor verifies that CheckerColor produces only the single
+// color used in its input.
+func TestCheckerColorOneColor(t *testing.T) {
+	testCheckerColor(t, black, black)
+}
+
+// TestCheckerColorTwoColors verifies that CheckerColor produces only colors
+// which are used in its input.
+func TestCheckerColorTwoColors(t *testing.T) {
+	testCheckerColor(t, black, white)
+}
+
+// TestFuzzColorOneColor verifies that FuzzColor produces only the single
+// color used in its input.
+func TestFuzzColorOneColor(t *testing.T) {
+	testFuzzColor(t, []color.Color{black})
+}
+
+// TestFuzzColorMultipleColors verifies that FuzzColor produces only colors
+// which are used in its input.
+func TestFuzzColorMultipleColors(t *testing.T) {
+	testFuzzColor(t, []color.Color{black, white, red, green, blue})
+}
+
 // TestSolidColor verifies that SolidColor always returns the same input
 // color, for all input values.
 func TestSolidColor(t *testing.T) {
@@ -28,18 +52,6 @@ func TestSolidColor(t *testing.T) {
 			t.Fatalf("unexpected SolidColor color: %v != %v", out, c)
 		}
 	}
-}
-
-// TestFuzzColorOneColor verifies that FuzzColor produces only the single
-// color used in its input.
-func TestFuzzColorOneColor(t *testing.T) {
-	testFuzzColor(t, []color.Color{black})
-}
-
-// TestFuzzColorMultipleColors verifies that FuzzColor produces only colors
-// which are used in its input.
-func TestFuzzColorMultipleColors(t *testing.T) {
-	testFuzzColor(t, []color.Color{black, white, red, green, blue})
 }
 
 // TestStripeColorOneColor verifies that StripeColor produces a correct
@@ -59,6 +71,34 @@ func TestStripeColorMultipleColors(t *testing.T) {
 		black, white, white, red, green, green, green, blue,
 		black, white, white, red, green, green, green, blue,
 	})
+}
+
+// testCheckerColor is a test helper which aids in testing the CheckerColor function.
+func testCheckerColor(t *testing.T, colorA color.Color, colorB color.Color) {
+	// Predefined values for test
+	const maxX, maxY, size = 1000, 1000, 10
+
+	// Generate checker function with input values
+	fn := CheckerColor(colorA, colorB, size)
+
+	// Iterate all coordinates and check color at each
+	for x := 0; x < maxX; x++ {
+		for y := 0; y < maxY; y++ {
+			// Check color at specified coordinate
+			c := fn(0, x, y, 0, maxX, maxY)
+
+			// Apply checker algorithm to determine if color A or B should be used
+			if ((uint(x)/size)+(uint(y)/size))%2 == 0 {
+				if c != colorA {
+					t.Fatalf("unexpected color: %v != %v", c, colorA)
+				}
+			} else {
+				if c != colorB {
+					t.Fatalf("unexpected color: %v != %v", c, colorB)
+				}
+			}
+		}
+	}
 }
 
 // testFuzzColor is a test helper which aids in testing the FuzzColor function.
