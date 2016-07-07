@@ -7,11 +7,11 @@ import (
 	"io"
 	"math"
 
-	"azul3d.org/audio.v1"
+	"azul3d.org/engine/audio"
 
 	// Import WAV and FLAC decoders
-	_ "azul3d.org/audio/wav.v1"
-	_ "github.com/azul3d/audio-flac"
+	_ "azul3d.org/engine/audio/flac"
+	_ "azul3d.org/engine/audio/wav"
 )
 
 const (
@@ -23,8 +23,8 @@ const (
 	scaleDefault = 3.00
 )
 
-// Error values from azul3d/audio.v1 are wrapped, so that callers do not have to
-// import an additional package to check for common errors.
+// Error values from azul3d/engine/audio are wrapped, so that callers do not
+// have to import an additional package to check for common errors.
 var (
 	// ErrFormat is returned when the input audio format is not a registered format
 	// with the audio package.
@@ -172,7 +172,7 @@ func (w *Waveform) readAndComputeSamples() ([]float64, error) {
 
 	// samples is a slice of float64 audio samples, used to store decoded values
 	config := decoder.Config()
-	samples := make(audio.F64Samples, uint(config.SampleRate*config.Channels)/w.resolution)
+	samples := make(audio.Float64, uint(config.SampleRate*config.Channels)/w.resolution)
 	for {
 		// Decode at specified resolution from options
 		// On any error other than end-of-stream, return
