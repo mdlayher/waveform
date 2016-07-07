@@ -3,7 +3,7 @@ waveform [![Build Status](https://travis-ci.org/mdlayher/waveform.svg?branch=mas
 
 Go package capable of generating waveform images from audio streams.  MIT Licensed.
 
-This library supports any audio streams which the [azul3d/audio.v1](http://azul3d.org/audio.v1)
+This library supports any audio streams which the [azul3d/engine/audio](http://azul3d.org/engine/audio)
 package is able to decode.  At the time of writing, this includes:
   - WAV
   - FLAC

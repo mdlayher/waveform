@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"azul3d.org/audio.v1"
+	"azul3d.org/engine/audio"
 )
 
 // BenchmarkGenerateWAV checks the performance of the Generate() function with a WAV file
@@ -119,9 +119,9 @@ func benchmarkWaveformDraw(b *testing.B, count int) {
 func benchmarkRMSF64Samples(b *testing.B, count int) {
 	// Generate slice of samples
 	rand.Seed(time.Now().UnixNano())
-	var samples audio.F64Samples
+	var samples audio.Float64
 	for i := 0; i < count; i++ {
-		samples = append(samples, audio.F64(rand.Float64()))
+		samples = append(samples, rand.Float64())
 	}
 
 	// Reset timer and start benchmark
