@@ -1,25 +1,30 @@
-waveform [![Build Status](https://travis-ci.org/mdlayher/waveform.svg?branch=master)](https://travis-ci.org/mdlayher/waveform) [![GoDoc](http://godoc.org/github.com/mdlayher/waveform?status.svg)](http://godoc.org/github.com/mdlayher/waveform)
-========
+# waveform
 
-Go package capable of generating waveform images from audio streams.  MIT Licensed.
+[![Build Status](https://travis-ci.org/mdlayher/waveform.svg?branch=master)](https://travis-ci.org/mdlayher/waveform)
+[![GoDoc](http://godoc.org/github.com/mdlayher/waveform?status.svg)](http://godoc.org/github.com/mdlayher/waveform)
 
-This library supports any audio streams which the [azul3d/engine/audio](http://azul3d.org/engine/audio)
-package is able to decode.  At the time of writing, this includes:
-  - WAV
-  - FLAC
+Go package capable of generating waveform images from audio streams. MIT
+licensed.
 
-An example binary called `waveform` is provided which show's the library's usage.
-Please see [cmd/waveform/README.md](https://github.com/mdlayher/waveform/blob/master/cmd/waveform/README.md)
+This library supports any audio streams which the
+[azul3d/engine/audio](http://azul3d.org/engine/audio) package is able to decode.
+At the time of writing, this includes:
+
+- WAV
+- FLAC
+
+An example binary called `waveform` is provided which shows the library's usage.
+Please see
+[cmd/waveform/README.md](https://github.com/mdlayher/waveform/blob/master/cmd/waveform/README.md)
 for details.
 
-Examples
-========
+## Examples
 
-Here are several example images generated using `waveform`.  Enjoy!
+Here are several example images generated using `waveform`. Enjoy!
 
 Generate a waveform image, and scale it both vertically and horizontally.
 
-```
+```sh
 $ cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -x 5 -y 2 > ~/waveform.png
 ```
 
@@ -27,7 +32,7 @@ $ cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -x 5 -y 2 > ~/waveform.png
 
 Apply a foreground and background color, to make things more interesting.
 
-```
+```sh
 cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF3300 -bg=#0099CC -x 5 -y 2 > ~/waveform_color.png
 ```
 
@@ -35,7 +40,7 @@ cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF3300 -bg=#0099CC -x 5 
 
 Apply an alternate foreground color, draw using a stripe pattern.
 
-```
+```sh
 cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF3300 -bg=#0099CC -alt=#FF9933 -fn stripe -x 5 -y 2 > ~/waveform_stripe.png
 ```
 
@@ -43,7 +48,7 @@ cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF3300 -bg=#0099CC -alt=
 
 Apply an alternate foreground color, draw using a random fuzz pattern.
 
-```
+```sh
 cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF3300 -bg=#0099CC -alt=#FF9933 -fn fuzz -x 5 -y 2 > ~/waveform_fuzz.png
 ```
 
@@ -51,7 +56,7 @@ cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF3300 -bg=#0099CC -alt=
 
 Apply a new set of colors, draw using a gradient pattern.
 
-```
+```sh
 cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF0000 -bg=#00FF00 -alt=#0000FF -fn gradient -x 5 -y 2 > ~/waveform_gradient.png
 ```
 
@@ -59,7 +64,7 @@ cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#FF0000 -bg=#00FF00 -alt=
 
 Apply a checkerboard color set, draw using a checkerboard pattern.
 
-```
+```sh
 cat ~/Music/02\ -\ Peace\ Of\ Mind.flac | waveform -fg=#000000 -bg=#222222 -alt=#FFFFFF -fn checker -x 5 -y 2 > ~/waveform_checker.png
 ```
 
